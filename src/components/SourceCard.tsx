@@ -1,70 +1,77 @@
 "use client";
 
-import { FileText } from "lucide-react";
 import type { RetrievedChunk } from "@/lib/rag/types";
+import {
+  VERTICAL_COLORS,
+  DEFAULT_VERTICAL_COLOR,
+} from "@/lib/data/taxonomy";
 
 export function SourceCard({
   chunk,
   index,
+  animDelay,
 }: {
   chunk: RetrievedChunk;
   index: number;
+  animDelay?: number;
 }) {
   const { metadata, score } = chunk;
-  const scorePercent = (score * 100).toFixed(1);
+  const colors = VERTICAL_COLORS[metadata.tema] || DEFAULT_VERTICAL_COLOR;
+  const scorePct = Math.round(score * 100);
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-800/50 p-3 text-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-blue-400" />
-          <span className="font-medium text-gray-200">
-            Fuente {index + 1}
+    <div
+      className={`animate-fade-up rounded-lg border ${colors.border} ${colors.bg} p-3 transition-colors hover:bg-card-hover`}
+      style={{ animationDelay: `${animDelay ?? index * 0.06}s` }}
+    >
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />
+          <span className="text-xs font-medium text-slate-300 truncate">
+            [{index + 1}] {metadata.extracto.slice(0, 80)}
           </span>
         </div>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-mono ${
-            score > 0.8
-              ? "bg-emerald-900/50 text-emerald-300"
-              : score > 0.6
-                ? "bg-yellow-900/50 text-yellow-300"
-                : "bg-red-900/50 text-red-300"
-          }`}
-        >
-          {scorePercent}%
-        </span>
+
+        {/* Score bar */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="h-1.5 w-12 rounded-full bg-slate-800 overflow-hidden">
+            <div
+              className={`h-full rounded-full animate-score-grow ${
+                score > 0.75
+                  ? "bg-emerald-400"
+                  : score > 0.6
+                    ? "bg-amber-400"
+                    : "bg-red-400"
+              }`}
+              style={{ width: `${scorePct}%` }}
+            />
+          </div>
+          <span className="text-[10px] font-mono text-slate-500 w-7 text-right">
+            .{(score * 1000).toFixed(0).padStart(3, "0")}
+          </span>
+        </div>
       </div>
 
-      <p className="mb-2 line-clamp-3 text-gray-300">{metadata.extracto}</p>
-
-      <div className="flex flex-wrap gap-1.5 text-xs">
-        {metadata.tema && (
-          <span className="rounded bg-blue-900/40 px-1.5 py-0.5 text-blue-300">
-            {metadata.tema}
-          </span>
-        )}
+      <div className="flex flex-wrap gap-1 text-[10px]">
+        <span className={`rounded px-1.5 py-0.5 ${colors.bg} ${colors.text} font-medium`}>
+          {metadata.tema}
+        </span>
         {metadata.filtroTipo && (
-          <span className="rounded bg-purple-900/40 px-1.5 py-0.5 text-purple-300">
+          <span className="rounded px-1.5 py-0.5 bg-slate-800/60 text-slate-400">
             {metadata.filtroTipo}
           </span>
         )}
         {metadata.filtroAutoridad && (
-          <span className="rounded bg-amber-900/40 px-1.5 py-0.5 text-amber-300">
+          <span className="rounded px-1.5 py-0.5 bg-slate-800/60 text-slate-400">
             {metadata.filtroAutoridad}
           </span>
         )}
         {metadata.filtroAno && (
-          <span className="rounded bg-gray-700 px-1.5 py-0.5 text-gray-300">
+          <span className="rounded px-1.5 py-0.5 bg-slate-800/60 text-slate-500">
             {metadata.filtroAno}
           </span>
         )}
       </div>
-
-      {metadata.documentoOrigen && (
-        <p className="mt-2 truncate text-xs text-gray-500">
-          {metadata.documentoOrigen}
-        </p>
-      )}
     </div>
   );
 }

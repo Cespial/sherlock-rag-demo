@@ -1,23 +1,29 @@
 "use client";
 
 import { ChatPanel } from "./ChatPanel";
-import type { RAGResponse } from "@/lib/rag/types";
+import type { PanelState } from "@/lib/rag/types";
 
-export function ComparisonView({ results }: { results: RAGResponse[] }) {
-  if (results.length === 0) return null;
+interface ComparisonViewProps {
+  panels: Record<string, PanelState>;
+  backends: ("pinecone" | "pgvector")[];
+}
 
-  if (results.length === 1) {
+export function ComparisonView({ panels, backends }: ComparisonViewProps) {
+  if (backends.length === 0) return null;
+
+  if (backends.length === 1) {
+    const b = backends[0];
     return (
       <div className="mx-auto max-w-3xl">
-        <ChatPanel response={results[0]} />
+        <ChatPanel panel={panels[b]} backend={b} />
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {results.map((r) => (
-        <ChatPanel key={r.backend} response={r} />
+    <div className="grid gap-4 lg:grid-cols-2">
+      {backends.map((b) => (
+        <ChatPanel key={b} panel={panels[b]} backend={b} />
       ))}
     </div>
   );

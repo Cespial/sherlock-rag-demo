@@ -11,19 +11,18 @@ REGLAS:
 3. Cita las fuentes usando [Fuente N] donde N corresponde al número del fragmento.
 4. Responde en español.
 5. Sé preciso y conciso. Los usuarios son abogados o reguladores que necesitan respuestas claras.
-6. Si hay términos equivalentes relevantes, menciónalos para ampliar el contexto.`;
+6. Si hay términos equivalentes relevantes, menciónalos para ampliar el contexto.
+7. Usa formato Markdown: headers, listas, **negritas** para conceptos clave.`;
 
 function buildContext(chunks: RetrievedChunk[]): string {
   return chunks
     .map(
       (c, i) =>
-        `[Fuente ${i + 1}] (score: ${c.score.toFixed(3)})
-Tema: ${c.metadata.tema} | Subtema: ${c.metadata.subtema}
-Tipo: ${c.metadata.filtroTipo} | Autoridad: ${c.metadata.filtroAutoridad} | Año: ${c.metadata.filtroAno}
-Documento: ${c.metadata.documentoOrigen}
+        `[${i + 1}] Tema: ${c.metadata.tema} | Subtema: ${c.metadata.subtema}
 Extracto: ${c.metadata.extracto}
-Términos: ${c.metadata.terminosRelacionados}
-Equivalencias: ${c.metadata.terminosEquivalentes}`
+Doc: ${c.metadata.documentoOrigen} | Tipo: ${c.metadata.filtroTipo} | Autoridad: ${c.metadata.filtroAutoridad} | Año: ${c.metadata.filtroAno}
+Términos: ${c.metadata.terminosRelacionados.slice(0, 200)}
+Equivalencias: ${c.metadata.terminosEquivalentes.slice(0, 200)}`
     )
     .join("\n\n---\n\n");
 }
@@ -40,12 +39,12 @@ export async function generateAnswer(
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
-    max_tokens: 1024,
+    max_tokens: 768,
     system: SYSTEM_PROMPT,
     messages: [
       {
         role: "user",
-        content: `CONTEXTO (fragmentos recuperados de la base documental Fintech):\n\n${context}\n\n---\n\nPREGUNTA: ${query}`,
+        content: `CONTEXTO:\n\n${context}\n\n---\n\nPREGUNTA: ${query}`,
       },
     ],
   });
@@ -55,4 +54,38 @@ export async function generateAnswer(
     return block.text;
   }
   return "Error: respuesta inesperada del modelo.";
+}
+
+export async function* streamAnswer(
+  query: string,
+  chunks: RetrievedChunk[]
+): AsyncGenerator<string> {
+  if (chunks.length === 0) {
+    yield "No se encontraron documentos relevantes para tu consulta. Intenta reformular la pregunta o ajustar los filtros.";
+    return;
+  }
+
+  const context = buildContext(chunks);
+
+  const stream = await anthropic.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 768,
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `CONTEXTO:\n\n${context}\n\n---\n\nPREGUNTA: ${query}`,
+      },
+    ],
+    stream: true,
+  });
+
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      yield event.delta.text;
+    }
+  }
 }

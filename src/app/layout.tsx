@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Instrument_Serif, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -17,13 +23,13 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#030712",
+  themeColor: "#040810",
 };
 
 export const metadata: Metadata = {
-  title: "Sherlock RAG Demo — Pinecone vs pgvector",
+  title: "Sherlock — RAG Architecture Comparison",
   description:
-    "Comparación side-by-side de arquitecturas RAG para búsqueda legal Fintech colombiana. 252 documentos, 8 verticales.",
+    "Comparación side-by-side de Pinecone vs pgvector para búsqueda legal Fintech colombiana. 222 documentos, 8 verticales.",
   authors: [{ name: "tensor.lat" }],
 };
 
@@ -33,9 +39,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-white overscroll-none`}
+        className={`${outfit.variable} ${instrumentSerif.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>
