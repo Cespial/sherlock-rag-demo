@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import { SourceCard } from "./SourceCard";
 import { MetricsBar } from "./MetricsBar";
-import type { PanelState } from "@/lib/rag/types";
+import type { PanelState, QueryConfig } from "@/lib/rag/types";
 
 interface ChatPanelProps {
   panel: PanelState;
@@ -13,6 +13,7 @@ interface ChatPanelProps {
 const STATUS_LABELS: Record<string, string> = {
   embedding: "Generando embedding…",
   retrieving: "Buscando documentos…",
+  reranking: "Reranking con Cohere…",
   generating: "Generando respuesta…",
 };
 
@@ -30,56 +31,60 @@ export function ChatPanel({ panel, backend }: ChatPanelProps) {
     panel.status !== "done" &&
     panel.status !== "error";
 
+  const config = panel.config;
+
   return (
-    <div
-      className={`animate-fade-up rounded-2xl ${panelClass} bg-card card-shadow overflow-hidden`}
-    >
+    <div className={`animate-fade-up rounded-2xl ${panelClass} bg-card card-shadow overflow-hidden`}>
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <div className="flex items-center gap-2.5">
-          <div
-            className={`h-2 w-2 rounded-full ${dotColor} ${
-              isActive ? "animate-pulse-soft" : ""
-            }`}
-          />
+          <div className={`h-2 w-2 rounded-full ${dotColor} ${isActive ? "animate-pulse-soft" : ""}`} />
           <div>
-            <span className={`text-sm font-semibold ${accentText}`}>
-              {label}
-            </span>
-            <span className="ml-2 text-[11px] text-text-tertiary">
-              {sublabel}
-            </span>
+            <span className={`text-sm font-semibold ${accentText}`}>{label}</span>
+            <span className="ml-2 text-[11px] text-text-tertiary">{sublabel}</span>
           </div>
         </div>
 
-        {isActive && (
-          <span className="text-[11px] text-text-tertiary animate-pulse-soft">
-            {STATUS_LABELS[panel.status] || ""}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Config badges */}
+          {config && (
+            <div className="flex gap-1">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-tertiary uppercase">
+                {config.embedding}
+              </span>
+              {config.rerank && (
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-medium text-amber-700 uppercase">
+                  rerank
+                </span>
+              )}
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[9px] font-medium text-text-tertiary uppercase">
+                {config.speed}
+              </span>
+            </div>
+          )}
+
+          {isActive && (
+            <span className="text-[11px] text-text-tertiary animate-pulse-soft">
+              {STATUS_LABELS[panel.status] || ""}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="px-5 pb-5 space-y-4">
-        {/* Error */}
         {panel.status === "error" && panel.error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-[13px] text-red-700">
             {panel.error}
           </div>
         )}
 
-        {/* Answer */}
         {panel.answer && (
-          <div
-            className={`markdown-body text-[14px] ${
-              isStreaming ? "streaming-cursor" : ""
-            }`}
-          >
+          <div className={`markdown-body text-[14px] ${isStreaming ? "streaming-cursor" : ""}`}>
             <ReactMarkdown>{panel.answer}</ReactMarkdown>
           </div>
         )}
 
-        {/* Skeleton while retrieving */}
-        {panel.status === "retrieving" && (
+        {(panel.status === "retrieving" || panel.status === "reranking") && (
           <div className="space-y-2.5">
             {[1, 2, 3].map((i) => (
               <div
@@ -91,7 +96,6 @@ export function ChatPanel({ panel, backend }: ChatPanelProps) {
           </div>
         )}
 
-        {/* Sources */}
         {panel.sources.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -110,7 +114,6 @@ export function ChatPanel({ panel, backend }: ChatPanelProps) {
           </div>
         )}
 
-        {/* Metrics */}
         {panel.timings && (
           <MetricsBar
             timings={panel.timings}

@@ -1,5 +1,6 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import type { RetrievedChunk, SearchFilter } from "./types";
+import type { EmbeddingProvider } from "./embeddings";
 
 let client: Pinecone | null = null;
 
@@ -10,13 +11,20 @@ function getClient() {
   return client;
 }
 
+const INDEX_MAP: Record<EmbeddingProvider, string> = {
+  voyage: process.env.PINECONE_INDEX || "sherlock-fintech",
+  openai: process.env.PINECONE_INDEX_OPENAI || "sherlock-openai",
+};
+
 export async function searchPinecone(
   queryVector: number[],
   filters: SearchFilter,
-  topK = 5
+  topK = 5,
+  embeddingProvider: EmbeddingProvider = "voyage"
 ): Promise<RetrievedChunk[]> {
   const pc = getClient();
-  const index = pc.index(process.env.PINECONE_INDEX || "sherlock-fintech");
+  const indexName = INDEX_MAP[embeddingProvider];
+  const index = pc.index(indexName);
 
   const filterObj: Record<string, { $eq: string }> = {};
   if (filters.tema) filterObj.tema = { $eq: filters.tema };

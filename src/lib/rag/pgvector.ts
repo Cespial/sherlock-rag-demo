@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { RetrievedChunk, SearchFilter } from "./types";
+import type { EmbeddingProvider } from "./embeddings";
 
 function getClient() {
   return createClient(
@@ -8,14 +9,21 @@ function getClient() {
   );
 }
 
+const RPC_MAP: Record<EmbeddingProvider, string> = {
+  voyage: "match_fintech_documents",
+  openai: "match_fintech_documents_openai",
+};
+
 export async function searchPgvector(
   queryVector: number[],
   filters: SearchFilter,
-  topK = 5
+  topK = 5,
+  embeddingProvider: EmbeddingProvider = "voyage"
 ): Promise<RetrievedChunk[]> {
   const supabase = getClient();
+  const rpcName = RPC_MAP[embeddingProvider];
 
-  const { data, error } = await supabase.rpc("match_fintech_documents", {
+  const { data, error } = await supabase.rpc(rpcName, {
     query_embedding: queryVector,
     match_count: topK,
     filter_tema: filters.tema || null,

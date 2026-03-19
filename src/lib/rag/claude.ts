@@ -3,6 +3,13 @@ import type { RetrievedChunk } from "./types";
 
 const anthropic = new Anthropic();
 
+export type LLMSpeed = "sonnet" | "haiku";
+
+const MODEL_MAP: Record<LLMSpeed, string> = {
+  sonnet: "claude-sonnet-4-20250514",
+  haiku: "claude-haiku-4-5-20251001",
+};
+
 const SYSTEM_PROMPT = `Eres Sherlock, un asistente legal especializado en regulación Fintech colombiana.
 
 Tu base de conocimiento son extractos de documentos legales (leyes, decretos, circulares, conceptos) organizados por vertical Fintech: Crédito Digital, Crowdfunding, Factoring, Insurtech, Neobancos, Pagos Digitales, RegTech, WealthTech.
@@ -15,63 +22,56 @@ REGLAS:
 5. Cuando un fragmento liste términos equivalentes, menciona los más relevantes para dar contexto al lector.
 6. Si múltiples fuentes cubren el mismo tema, sintetiza en vez de repetir.`;
 
-/**
- * Build optimized context for Claude.
- *
- * Key insight: many "extracto" values are just section headers (e.g. "9.1.1 DEFINICIÓN Y ALCANCE").
- * The real content is in terminosRelacionados and terminosEquivalentes.
- * We structure the context to put the rich content first.
- */
 function buildContext(chunks: RetrievedChunk[]): string {
   return chunks
     .map((c, i) => {
       const m = c.metadata;
       const lines: string[] = [];
-
-      // Header: number + vertical + subtema
       lines.push(`[${i + 1}] ${m.tema} — ${m.subtema || m.extracto}`);
-
-      // Source reference (compact)
       const meta: string[] = [];
       if (m.documentoOrigen) meta.push(m.documentoOrigen);
       if (m.filtroTipo) meta.push(m.filtroTipo);
       if (m.filtroAutoridad) meta.push(m.filtroAutoridad);
       if (m.filtroAno) meta.push(m.filtroAno);
       if (meta.length > 0) lines.push(`Fuente: ${meta.join(" · ")}`);
-
-      // Main content: términos relacionados (the actual legal substance)
       if (m.terminosRelacionados) {
         lines.push(`Conceptos clave: ${m.terminosRelacionados}`);
       }
-
-      // Equivalences (useful for cross-referencing)
       if (m.terminosEquivalentes) {
         lines.push(`Equivalencias: ${m.terminosEquivalentes}`);
       }
-
       return lines.join("\n");
     })
     .join("\n\n---\n\n");
 }
 
-export async function generateAnswer(
-  query: string,
-  chunks: RetrievedChunk[]
-): Promise<string> {
-  if (chunks.length === 0) {
-    return "No se encontraron documentos relevantes para tu consulta. Intenta reformular la pregunta o ajustar los filtros.";
-  }
-
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 768,
+function buildMessages(query: string, chunks: RetrievedChunk[]) {
+  return {
     system: SYSTEM_PROMPT,
     messages: [
       {
-        role: "user",
+        role: "user" as const,
         content: `CONTEXTO:\n\n${buildContext(chunks)}\n\n---\n\nPREGUNTA: ${query}`,
       },
     ],
+  };
+}
+
+export async function generateAnswer(
+  query: string,
+  chunks: RetrievedChunk[],
+  speed: LLMSpeed = "sonnet"
+): Promise<string> {
+  if (chunks.length === 0) {
+    return "No se encontraron documentos relevantes para tu consulta.";
+  }
+
+  const { system, messages } = buildMessages(query, chunks);
+  const message = await anthropic.messages.create({
+    model: MODEL_MAP[speed],
+    max_tokens: 768,
+    system,
+    messages,
   });
 
   const block = message.content[0];
@@ -80,25 +80,20 @@ export async function generateAnswer(
 
 export async function* streamAnswer(
   query: string,
-  chunks: RetrievedChunk[]
+  chunks: RetrievedChunk[],
+  speed: LLMSpeed = "sonnet"
 ): AsyncGenerator<string> {
   if (chunks.length === 0) {
-    yield "No se encontraron documentos relevantes para tu consulta. Intenta reformular la pregunta o ajustar los filtros.";
+    yield "No se encontraron documentos relevantes para tu consulta.";
     return;
   }
 
-  const context = buildContext(chunks);
-
+  const { system, messages } = buildMessages(query, chunks);
   const stream = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_MAP[speed],
     max_tokens: 768,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `CONTEXTO:\n\n${context}\n\n---\n\nPREGUNTA: ${query}`,
-      },
-    ],
+    system,
+    messages,
     stream: true,
   });
 

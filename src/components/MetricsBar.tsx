@@ -26,6 +26,7 @@ interface MetricsBarProps {
 export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
   const total = timings.total_ms || 1;
   const accentClass = accent === "pinecone" ? "text-pinecone" : "text-pgvector";
+  const hasRerank = typeof timings.rerank_ms === "number" && timings.rerank_ms > 0;
 
   const stages = [
     { label: "Embed", ms: timings.embedding_ms, bar: "bg-gray-300" },
@@ -34,6 +35,9 @@ export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
       ms: timings.retrieval_ms,
       bar: accent === "pinecone" ? "bg-cyan-400" : "bg-violet-400",
     },
+    ...(hasRerank
+      ? [{ label: "Rerank", ms: timings.rerank_ms!, bar: "bg-amber-400" }]
+      : []),
     {
       label: "LLM",
       ms: timings.generation_ms,
@@ -53,7 +57,6 @@ export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
         </span>
       </div>
 
-      {/* Bar */}
       <div className="flex h-1 overflow-hidden rounded-full bg-gray-100 mb-2.5">
         {stages.map((s) => (
           <div
@@ -64,8 +67,7 @@ export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
         ))}
       </div>
 
-      {/* Labels */}
-      <div className="flex gap-4 text-[10px]">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px]">
         {stages.map((s) => (
           <div key={s.label} className="flex items-center gap-1.5">
             <div className={`h-1.5 w-1.5 rounded-full ${s.bar}`} />

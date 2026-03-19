@@ -1,3 +1,6 @@
+import type { EmbeddingProvider } from "./embeddings";
+import type { LLMSpeed } from "./claude";
+
 export interface SearchFilter {
   tema?: string;
   tipo?: string;
@@ -28,6 +31,7 @@ export interface RetrievedChunk {
 export interface StageTimings {
   embedding_ms: number;
   retrieval_ms: number;
+  rerank_ms?: number;
   generation_ms: number;
   total_ms: number;
 }
@@ -39,10 +43,19 @@ export interface RAGResponse {
   backend: "pinecone" | "pgvector";
 }
 
+// Query configuration
+export interface QueryConfig {
+  backend: "pinecone" | "pgvector";
+  embedding: EmbeddingProvider;
+  rerank: boolean;
+  speed: LLMSpeed;
+}
+
 // Streaming event types (NDJSON)
 export type StreamEvent =
   | { type: "embedding"; ms: number }
   | { type: "sources"; chunks: RetrievedChunk[]; retrieval_ms: number }
+  | { type: "rerank"; ms: number; enabled: boolean }
   | { type: "token"; text: string }
   | { type: "metrics"; timings: StageTimings }
   | { type: "done" }
@@ -50,11 +63,12 @@ export type StreamEvent =
 
 // Frontend panel state
 export interface PanelState {
-  status: "idle" | "embedding" | "retrieving" | "generating" | "done" | "error";
+  status: "idle" | "embedding" | "retrieving" | "reranking" | "generating" | "done" | "error";
   answer: string;
   sources: RetrievedChunk[];
   timings: StageTimings | null;
   error: string | null;
+  config?: QueryConfig;
 }
 
 export const INITIAL_PANEL: PanelState = {

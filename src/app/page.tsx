@@ -10,16 +10,79 @@ import type {
   SearchFilter,
   RetrievedChunk,
   StageTimings,
+  QueryConfig,
 } from "@/lib/rag/types";
 import { INITIAL_PANEL } from "@/lib/rag/types";
+import type { EmbeddingProvider } from "@/lib/rag/embeddings";
+import type { LLMSpeed } from "@/lib/rag/claude";
 import { Search, Loader2 } from "lucide-react";
 
 type BackendMode = "both" | "pinecone" | "pgvector";
+
+// Toggle pill component
+function Toggle<T extends string>({
+  options,
+  value,
+  onChange,
+  labels,
+}: {
+  options: T[];
+  value: T;
+  onChange: (v: T) => void;
+  labels: Record<T, string>;
+}) {
+  return (
+    <div className="inline-flex rounded-full border border-border bg-white/70 p-0.5 card-shadow">
+      {options.map((o) => (
+        <button
+          key={o}
+          onClick={() => onChange(o)}
+          className={`rounded-full px-3 sm:px-4 py-1.5 text-[11px] font-medium transition-all ${
+            value === o
+              ? "bg-text text-white shadow-sm"
+              : "text-text-secondary hover:text-text"
+          }`}
+        >
+          {labels[o]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Checkbox toggle
+function Check({
+  label,
+  checked,
+  onChange,
+  color = "bg-text",
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  color?: string;
+}) {
+  return (
+    <button
+      onClick={() => onChange(!checked)}
+      className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-medium transition-all ${
+        checked
+          ? `${color} text-white border-transparent shadow-sm`
+          : "border-border text-text-secondary hover:text-text bg-white/70"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<SearchFilter>({});
   const [mode, setMode] = useState<BackendMode>("both");
+  const [embedding, setEmbedding] = useState<EmbeddingProvider>("voyage");
+  const [rerank, setRerank] = useState(false);
+  const [speed, setSpeed] = useState<LLMSpeed>("sonnet");
   const [hasQueried, setHasQueried] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [panels, setPanels] = useState<Record<string, PanelState>>({
@@ -53,9 +116,20 @@ export default function HomePage() {
       const backends: ("pinecone" | "pgvector")[] =
         mode === "both" ? ["pinecone", "pgvector"] : [mode];
 
+      const config: QueryConfig = {
+        backend: "pinecone", // overridden per backend
+        embedding,
+        rerank,
+        speed,
+      };
+
       const reset: Record<string, PanelState> = {};
       for (const b of backends) {
-        reset[b] = { ...INITIAL_PANEL, status: "embedding" };
+        reset[b] = {
+          ...INITIAL_PANEL,
+          status: "embedding",
+          config: { ...config, backend: b },
+        };
         answerRefs.current[b] = "";
       }
       setPanels(reset);
@@ -80,6 +154,12 @@ export default function HomePage() {
                   sources: chunks,
                   status: "generating",
                 },
+              }));
+            },
+            onRerank: () => {
+              setPanels((p) => ({
+                ...p,
+                [backend]: { ...p[backend], status: "reranking" },
               }));
             },
             onToken: (text: string) => {
@@ -119,6 +199,7 @@ export default function HomePage() {
               }));
             },
           },
+          { embedding, rerank, speed },
           controller.signal
         )
       );
@@ -126,7 +207,7 @@ export default function HomePage() {
       await Promise.allSettled(promises);
       setIsActive(false);
     },
-    [mode]
+    [mode, embedding, rerank, speed]
   );
 
   function handleSubmit(
@@ -142,11 +223,40 @@ export default function HomePage() {
     executeQuery(text, f ?? filters);
   }
 
+  // Controls bar (shared between hero and results)
+  const controlsBar = (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <Toggle
+        options={["both", "pinecone", "pgvector"] as BackendMode[]}
+        value={mode}
+        onChange={setMode}
+        labels={{ both: "Ambos", pinecone: "Pinecone", pgvector: "pgvector" }}
+      />
+      <Toggle
+        options={["voyage", "openai"] as EmbeddingProvider[]}
+        value={embedding}
+        onChange={setEmbedding}
+        labels={{ voyage: "Voyage", openai: "OpenAI" }}
+      />
+      <Toggle
+        options={["sonnet", "haiku"] as LLMSpeed[]}
+        value={speed}
+        onChange={setSpeed}
+        labels={{ sonnet: "Sonnet", haiku: "Haiku" }}
+      />
+      <Check
+        label="Rerank"
+        checked={rerank}
+        onChange={setRerank}
+        color="bg-amber-500"
+      />
+    </div>
+  );
+
   // ─── Hero state ───
   if (!hasQueried) {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 overflow-hidden">
-        {/* Video background */}
         <video
           autoPlay
           muted
@@ -159,8 +269,7 @@ export default function HomePage() {
         </video>
         <div className="absolute inset-0 hero-gradient" />
 
-        <div className="relative z-10 w-full max-w-2xl space-y-10 animate-fade-up">
-          {/* Brand */}
+        <div className="relative z-10 w-full max-w-2xl space-y-8 animate-fade-up">
           <div className="text-center space-y-3">
             <h1
               className="text-6xl sm:text-7xl tracking-tight text-text"
@@ -172,11 +281,10 @@ export default function HomePage() {
               Comparación de arquitecturas RAG para búsqueda legal Fintech
             </p>
             <p className="text-[12px] text-text-tertiary">
-              222 documentos &middot; 8 verticales &middot; Pinecone vs pgvector
+              222 documentos &middot; 8 verticales &middot; Multi-embedding &middot; Reranking &middot; Multi-LLM
             </p>
           </div>
 
-          {/* Search */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -203,35 +311,12 @@ export default function HomePage() {
             </div>
           </form>
 
-          {/* Backend toggle */}
-          <div className="flex justify-center">
-            <div className="inline-flex rounded-full border border-border bg-white/70 p-1 card-shadow">
-              {(["both", "pinecone", "pgvector"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`rounded-full px-5 py-2 text-[12px] font-medium transition-all ${
-                    mode === m
-                      ? "bg-text text-white shadow-sm"
-                      : "text-text-secondary hover:text-text"
-                  }`}
-                >
-                  {m === "both"
-                    ? "Ambos"
-                    : m === "pinecone"
-                      ? "Pinecone"
-                      : "pgvector"}
-                </button>
-              ))}
-            </div>
-          </div>
+          {controlsBar}
 
-          {/* Filter chips */}
           <div className="flex justify-center">
             <FilterChips filters={filters} onChange={setFilters} />
           </div>
 
-          {/* Suggestions */}
           <div className="animate-fade-up delay-3">
             <p className="mb-4 text-center text-[10px] font-medium text-text-tertiary uppercase tracking-[0.15em]">
               Consultas sugeridas
@@ -240,9 +325,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Footer */}
         <p className="fixed bottom-5 text-[10px] text-text-tertiary tracking-wide z-10">
-          tensor.lat &middot; Claude &middot; Voyage AI &middot; Pinecone &middot; Supabase
+          tensor.lat &middot; Claude &middot; Voyage AI &middot; OpenAI &middot; Cohere &middot; Pinecone &middot; Supabase
         </p>
       </div>
     );
@@ -251,11 +335,9 @@ export default function HomePage() {
   // ─── Results state ───
   return (
     <div className="min-h-screen bg-surface/40">
-      {/* Sticky frosted header */}
       <header className="sticky top-0 z-20 frosted border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-5">
-            {/* Brand */}
+          <div className="flex items-center gap-4">
             <button
               onClick={() => {
                 setHasQueried(false);
@@ -274,13 +356,12 @@ export default function HomePage() {
               </span>
             </button>
 
-            {/* Search */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();
               }}
-              className="relative flex-1 max-w-lg"
+              className="relative flex-1 max-w-md"
             >
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
               <input
@@ -295,36 +376,20 @@ export default function HomePage() {
               )}
             </form>
 
-            {/* Backend toggle */}
-            <div className="flex rounded-full border border-border bg-white p-0.5">
-              {(["both", "pinecone", "pgvector"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`rounded-full px-3 sm:px-4 py-1.5 text-[10px] sm:text-[11px] font-medium transition-all ${
-                    mode === m
-                      ? "bg-text text-white shadow-sm"
-                      : "text-text-secondary hover:text-text"
-                  }`}
-                >
-                  {m === "both"
-                    ? "Ambos"
-                    : m === "pinecone"
-                      ? "Pinecone"
-                      : "pgvector"}
-                </button>
-              ))}
-            </div>
+            <div className="hidden lg:block">{controlsBar}</div>
+          </div>
+
+          {/* Mobile controls */}
+          <div className="lg:hidden mt-2.5 overflow-x-auto">
+            {controlsBar}
           </div>
         </div>
       </header>
 
-      {/* Filter chips */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
         <FilterChips filters={filters} onChange={setFilters} />
       </div>
 
-      {/* Results */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-16">
         <ComparisonView panels={panels} backends={activeBackends} />
       </main>
