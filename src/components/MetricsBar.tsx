@@ -3,19 +3,19 @@
 import { useEffect, useState } from "react";
 import type { StageTimings } from "@/lib/rag/types";
 
-function AnimatedNum({ value }: { value: number }) {
+function AnimatedNum({ value, decimals = 0 }: { value: number; decimals?: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const dur = 500;
     const start = performance.now();
     function tick() {
       const p = Math.min((performance.now() - start) / dur, 1);
-      setDisplay(Math.round(value * (1 - Math.pow(1 - p, 3))));
+      setDisplay(value * (1 - Math.pow(1 - p, 3)));
       if (p < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }, [value]);
-  return <>{display}</>;
+  return <>{decimals > 0 ? display.toFixed(decimals) : Math.round(display)}</>;
 }
 
 interface MetricsBarProps {
@@ -47,15 +47,13 @@ export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
         <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest">
           Latencia
         </span>
-        <div className={`text-base font-semibold font-mono ${accentClass}`}>
-          <AnimatedNum value={Math.round(total / 1000 * 100)} />
-          <span className="text-[10px] text-text-tertiary ml-0.5">
-            ×10ms
-          </span>
-        </div>
+        <span className={`text-base font-semibold font-mono ${accentClass}`}>
+          <AnimatedNum value={total / 1000} decimals={2} />
+          <span className="text-[11px] text-text-tertiary ml-0.5">s</span>
+        </span>
       </div>
 
-      {/* Thin bar */}
+      {/* Bar */}
       <div className="flex h-1 overflow-hidden rounded-full bg-gray-100 mb-2.5">
         {stages.map((s) => (
           <div
@@ -72,7 +70,9 @@ export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
           <div key={s.label} className="flex items-center gap-1.5">
             <div className={`h-1.5 w-1.5 rounded-full ${s.bar}`} />
             <span className="text-text-tertiary">{s.label}</span>
-            <span className="font-mono text-text-secondary">{s.ms}ms</span>
+            <span className="font-mono text-text-secondary">
+              {s.ms >= 1000 ? `${(s.ms / 1000).toFixed(1)}s` : `${s.ms}ms`}
+            </span>
           </div>
         ))}
       </div>

@@ -152,6 +152,7 @@ export default function HomePage() {
           muted
           loop
           playsInline
+          poster="/hero-poster.jpg"
           className="absolute inset-0 w-full h-full object-cover opacity-40"
         >
           <source src="/hero-bg.mp4" type="video/mp4" />
@@ -295,12 +296,12 @@ export default function HomePage() {
             </form>
 
             {/* Backend toggle */}
-            <div className="hidden sm:flex rounded-full border border-border bg-white p-0.5">
+            <div className="flex rounded-full border border-border bg-white p-0.5">
               {(["both", "pinecone", "pgvector"] as const).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`rounded-full px-4 py-1.5 text-[11px] font-medium transition-all ${
+                  className={`rounded-full px-3 sm:px-4 py-1.5 text-[10px] sm:text-[11px] font-medium transition-all ${
                     mode === m
                       ? "bg-text text-white shadow-sm"
                       : "text-text-secondary hover:text-text"

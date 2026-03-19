@@ -6,6 +6,24 @@ import {
   DEFAULT_VERTICAL_COLOR,
 } from "@/lib/data/taxonomy";
 
+// Direct hex colors for left border (Tailwind CSS vars don't work inline)
+const BORDER_HEX: Record<string, string> = {
+  "Crédito Digital": "#06b6d4",
+  Crowdfunding: "#8b5cf6",
+  Factoring: "#f59e0b",
+  Insurtech: "#10b981",
+  Neobancos: "#f43f5e",
+  "Pagos Digitales": "#3b82f6",
+  RegTech: "#f97316",
+  WealthTech: "#84cc16",
+};
+
+function scoreLabel(score: number): { text: string; color: string } {
+  if (score >= 0.7) return { text: "Alta", color: "text-emerald-600 bg-emerald-50" };
+  if (score >= 0.55) return { text: "Media", color: "text-amber-600 bg-amber-50" };
+  return { text: "Baja", color: "text-red-500 bg-red-50" };
+}
+
 export function SourceCard({
   chunk,
   index,
@@ -15,6 +33,8 @@ export function SourceCard({
 }) {
   const { metadata, score } = chunk;
   const colors = VERTICAL_COLORS[metadata.tema] || DEFAULT_VERTICAL_COLOR;
+  const borderColor = BORDER_HEX[metadata.tema] || "#94a3b8";
+  const label = scoreLabel(score);
 
   return (
     <div
@@ -22,7 +42,7 @@ export function SourceCard({
       style={{
         animationDelay: `${index * 0.06}s`,
         borderLeftWidth: "3px",
-        borderLeftColor: `var(--tw-${colors.dot.replace("bg-", "")}, #94a3b8)`,
+        borderLeftColor: borderColor,
       }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -37,14 +57,10 @@ export function SourceCard({
           )}
         </div>
 
-        {/* Score */}
-        <div className="flex flex-col items-end shrink-0">
-          <span className={`text-[11px] font-mono font-semibold ${
-            score > 0.75 ? "text-emerald-600" : score > 0.6 ? "text-amber-600" : "text-red-500"
-          }`}>
-            {(score * 100).toFixed(1)}%
-          </span>
-        </div>
+        {/* Score badge */}
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${label.color}`}>
+          {label.text}
+        </span>
       </div>
 
       <div className="mt-2 flex flex-wrap gap-1">
