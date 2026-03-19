@@ -21,10 +21,10 @@ export function FilterChips({ filters, onChange }: FilterChipsProps) {
     <div className="flex flex-wrap gap-1.5">
       <button
         onClick={() => onChange({ ...filters, tema: undefined })}
-        className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+        className={`rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all ${
           !filters.tema
-            ? "bg-slate-700 text-slate-100 ring-1 ring-slate-500"
-            : "bg-slate-800/40 text-slate-500 hover:text-slate-300"
+            ? "bg-text text-white shadow-sm"
+            : "bg-transparent text-text-secondary hover:text-text hover:bg-surface"
         }`}
       >
         Todos
@@ -37,15 +37,15 @@ export function FilterChips({ filters, onChange }: FilterChipsProps) {
           <button
             key={tema}
             onClick={() => toggleTema(tema)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-medium transition-all ${
               active
-                ? `${colors.bg} ${colors.text} ring-1 ${colors.border}`
-                : "bg-slate-800/40 text-slate-500 hover:text-slate-300 hover:bg-slate-800/70"
+                ? `${colors.pill} shadow-sm ring-1 ${colors.border}`
+                : "bg-transparent text-text-secondary hover:text-text hover:bg-surface"
             }`}
           >
             <div
               className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                active ? colors.dot : "bg-slate-600"
+                active ? colors.dot : "bg-gray-300"
               }`}
             />
             {tema}

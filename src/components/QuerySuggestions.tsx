@@ -9,20 +9,20 @@ interface QuerySuggestionsProps {
 
 export function QuerySuggestions({ onSelect }: QuerySuggestionsProps) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
       {EXAMPLE_QUERIES.map((q, i) => (
         <button
           key={i}
           onClick={() =>
             onSelect(q.text, q.filters as SearchFilter | undefined)
           }
-          className={`animate-fade-up delay-${i + 1} group rounded-lg border border-border bg-card/50 p-3.5 text-left transition-all hover:border-border-bright hover:bg-card`}
+          className={`animate-fade-up delay-${i + 1} group rounded-2xl bg-card card-shadow border border-transparent p-4 text-left transition-all hover:card-shadow-hover hover:border-border`}
         >
-          <p className="text-sm leading-snug text-slate-300 group-hover:text-slate-100 transition-colors">
+          <p className="text-[13px] leading-relaxed text-text-secondary group-hover:text-text transition-colors">
             {q.text}
           </p>
           {q.filters?.tema && (
-            <span className="mt-2 inline-block text-[10px] text-slate-600">
+            <span className="mt-2.5 inline-block text-[10px] font-medium text-text-tertiary uppercase tracking-wider">
               {q.filters.tema}
             </span>
           )}

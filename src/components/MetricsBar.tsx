@@ -3,86 +3,76 @@
 import { useEffect, useState } from "react";
 import type { StageTimings } from "@/lib/rag/types";
 
-function AnimatedNumber({ value, suffix = "ms" }: { value: number; suffix?: string }) {
+function AnimatedNum({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
-
   useEffect(() => {
-    const duration = 600;
+    const dur = 500;
     const start = performance.now();
     function tick() {
-      const elapsed = performance.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(value * eased));
-      if (progress < 1) requestAnimationFrame(tick);
+      const p = Math.min((performance.now() - start) / dur, 1);
+      setDisplay(Math.round(value * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }, [value]);
-
-  return (
-    <span className="font-mono tabular-nums">
-      {display}
-      <span className="text-slate-600">{suffix}</span>
-    </span>
-  );
+  return <>{display}</>;
 }
 
 interface MetricsBarProps {
   timings: StageTimings;
-  accent?: "cyan" | "violet";
+  accent?: "pinecone" | "pgvector";
 }
 
-export function MetricsBar({ timings, accent = "cyan" }: MetricsBarProps) {
+export function MetricsBar({ timings, accent = "pinecone" }: MetricsBarProps) {
   const total = timings.total_ms || 1;
-  const accentColor = accent === "cyan" ? "text-cyan-400" : "text-violet-400";
+  const accentClass = accent === "pinecone" ? "text-pinecone" : "text-pgvector";
 
   const stages = [
-    {
-      label: "Embed",
-      ms: timings.embedding_ms,
-      bg: "bg-slate-600",
-    },
+    { label: "Embed", ms: timings.embedding_ms, bar: "bg-gray-300" },
     {
       label: "Retrieval",
       ms: timings.retrieval_ms,
-      bg: accent === "cyan" ? "bg-cyan-500" : "bg-violet-500",
+      bar: accent === "pinecone" ? "bg-cyan-400" : "bg-violet-400",
     },
     {
       label: "LLM",
       ms: timings.generation_ms,
-      bg: accent === "cyan" ? "bg-cyan-700" : "bg-violet-700",
+      bar: accent === "pinecone" ? "bg-cyan-600" : "bg-violet-600",
     },
   ];
 
   return (
-    <div className="animate-fade-up space-y-2 rounded-lg bg-surface/50 p-3">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+    <div className="animate-fade-up rounded-xl bg-surface/80 p-3.5">
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-[10px] font-medium text-text-tertiary uppercase tracking-widest">
           Latencia
         </span>
-        <span className={`text-sm font-mono font-semibold ${accentColor}`}>
-          <AnimatedNumber value={Math.round(total)} suffix="ms" />
-        </span>
+        <div className={`text-base font-semibold font-mono ${accentClass}`}>
+          <AnimatedNum value={Math.round(total / 1000 * 100)} />
+          <span className="text-[10px] text-text-tertiary ml-0.5">
+            ×10ms
+          </span>
+        </div>
       </div>
 
-      {/* Bar */}
-      <div className="flex h-1.5 overflow-hidden rounded-full bg-slate-800/60">
+      {/* Thin bar */}
+      <div className="flex h-1 overflow-hidden rounded-full bg-gray-100 mb-2.5">
         {stages.map((s) => (
           <div
             key={s.label}
-            className={`${s.bg} animate-score-grow transition-all`}
+            className={`${s.bar} animate-score-grow`}
             style={{ width: `${Math.max((s.ms / total) * 100, 1)}%` }}
           />
         ))}
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between text-[10px] text-slate-500">
+      <div className="flex gap-4 text-[10px]">
         {stages.map((s) => (
-          <div key={s.label} className="flex items-center gap-1">
-            <div className={`h-1.5 w-1.5 rounded-full ${s.bg}`} />
-            <span>{s.label}</span>
-            <span className="font-mono text-slate-600">{s.ms}ms</span>
+          <div key={s.label} className="flex items-center gap-1.5">
+            <div className={`h-1.5 w-1.5 rounded-full ${s.bar}`} />
+            <span className="text-text-tertiary">{s.label}</span>
+            <span className="font-mono text-text-secondary">{s.ms}ms</span>
           </div>
         ))}
       </div>

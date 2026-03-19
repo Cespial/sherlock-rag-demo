@@ -29,66 +29,75 @@ export const FILTRO_AUTORIDADES = [
   "Legislador",
 ] as const;
 
-// Color mapping per Fintech vertical
+// Light-theme vertical colors (subtle tints for Apple aesthetic)
 export const VERTICAL_COLORS: Record<
   string,
-  { bg: string; text: string; border: string; dot: string }
+  { bg: string; text: string; border: string; dot: string; pill: string }
 > = {
   "Crédito Digital": {
-    bg: "bg-cyan-950/30",
-    text: "text-cyan-400",
-    border: "border-cyan-700/40",
-    dot: "bg-cyan-400",
+    bg: "bg-cyan-50/60",
+    text: "text-cyan-700",
+    border: "border-cyan-200/60",
+    dot: "bg-cyan-500",
+    pill: "bg-cyan-50 text-cyan-700",
   },
   Crowdfunding: {
-    bg: "bg-violet-950/30",
-    text: "text-violet-400",
-    border: "border-violet-700/40",
-    dot: "bg-violet-400",
+    bg: "bg-violet-50/60",
+    text: "text-violet-700",
+    border: "border-violet-200/60",
+    dot: "bg-violet-500",
+    pill: "bg-violet-50 text-violet-700",
   },
   Factoring: {
-    bg: "bg-amber-950/30",
-    text: "text-amber-400",
-    border: "border-amber-700/40",
-    dot: "bg-amber-400",
+    bg: "bg-amber-50/60",
+    text: "text-amber-700",
+    border: "border-amber-200/60",
+    dot: "bg-amber-500",
+    pill: "bg-amber-50 text-amber-700",
   },
   Insurtech: {
-    bg: "bg-emerald-950/30",
-    text: "text-emerald-400",
-    border: "border-emerald-700/40",
-    dot: "bg-emerald-400",
+    bg: "bg-emerald-50/60",
+    text: "text-emerald-700",
+    border: "border-emerald-200/60",
+    dot: "bg-emerald-500",
+    pill: "bg-emerald-50 text-emerald-700",
   },
   Neobancos: {
-    bg: "bg-rose-950/30",
-    text: "text-rose-400",
-    border: "border-rose-700/40",
-    dot: "bg-rose-400",
+    bg: "bg-rose-50/60",
+    text: "text-rose-700",
+    border: "border-rose-200/60",
+    dot: "bg-rose-500",
+    pill: "bg-rose-50 text-rose-700",
   },
   "Pagos Digitales": {
-    bg: "bg-blue-950/30",
-    text: "text-blue-400",
-    border: "border-blue-700/40",
-    dot: "bg-blue-400",
+    bg: "bg-blue-50/60",
+    text: "text-blue-700",
+    border: "border-blue-200/60",
+    dot: "bg-blue-500",
+    pill: "bg-blue-50 text-blue-700",
   },
   RegTech: {
-    bg: "bg-orange-950/30",
-    text: "text-orange-400",
-    border: "border-orange-700/40",
-    dot: "bg-orange-400",
+    bg: "bg-orange-50/60",
+    text: "text-orange-700",
+    border: "border-orange-200/60",
+    dot: "bg-orange-500",
+    pill: "bg-orange-50 text-orange-700",
   },
   WealthTech: {
-    bg: "bg-lime-950/30",
-    text: "text-lime-400",
-    border: "border-lime-700/40",
-    dot: "bg-lime-400",
+    bg: "bg-lime-50/60",
+    text: "text-lime-700",
+    border: "border-lime-200/60",
+    dot: "bg-lime-500",
+    pill: "bg-lime-50 text-lime-700",
   },
 };
 
 export const DEFAULT_VERTICAL_COLOR = {
-  bg: "bg-slate-800/30",
-  text: "text-slate-400",
-  border: "border-slate-700/40",
-  dot: "bg-slate-400",
+  bg: "bg-gray-50/60",
+  text: "text-gray-600",
+  border: "border-gray-200/60",
+  dot: "bg-gray-400",
+  pill: "bg-gray-50 text-gray-600",
 };
 
 export interface ExampleQuery {

@@ -5,7 +5,12 @@ import { ComparisonView } from "@/components/ComparisonView";
 import { FilterChips } from "@/components/FilterChips";
 import { QuerySuggestions } from "@/components/QuerySuggestions";
 import { streamRAGQuery } from "@/lib/streaming";
-import type { PanelState, SearchFilter, RetrievedChunk, StageTimings } from "@/lib/rag/types";
+import type {
+  PanelState,
+  SearchFilter,
+  RetrievedChunk,
+  StageTimings,
+} from "@/lib/rag/types";
 import { INITIAL_PANEL } from "@/lib/rag/types";
 import { Search, Loader2 } from "lucide-react";
 
@@ -22,8 +27,14 @@ export default function HomePage() {
     pgvector: INITIAL_PANEL,
   });
   const abortRef = useRef<AbortController | null>(null);
-  const answerRefs = useRef<Record<string, string>>({ pinecone: "", pgvector: "" });
-  const rafRefs = useRef<Record<string, number | null>>({ pinecone: null, pgvector: null });
+  const answerRefs = useRef<Record<string, string>>({
+    pinecone: "",
+    pgvector: "",
+  });
+  const rafRefs = useRef<Record<string, number | null>>({
+    pinecone: null,
+    pgvector: null,
+  });
 
   const activeBackends: ("pinecone" | "pgvector")[] =
     mode === "both" ? ["pinecone", "pgvector"] : [mode];
@@ -32,7 +43,6 @@ export default function HomePage() {
     async (q: string, f: SearchFilter) => {
       if (!q.trim()) return;
 
-      // Abort previous
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -43,7 +53,6 @@ export default function HomePage() {
       const backends: ("pinecone" | "pgvector")[] =
         mode === "both" ? ["pinecone", "pgvector"] : [mode];
 
-      // Reset panels
       const reset: Record<string, PanelState> = {};
       for (const b of backends) {
         reset[b] = { ...INITIAL_PANEL, status: "embedding" };
@@ -63,21 +72,24 @@ export default function HomePage() {
                 [backend]: { ...p[backend], status: "retrieving" },
               }));
             },
-            onSources: (chunks: RetrievedChunk[], _ms: number) => {
+            onSources: (chunks: RetrievedChunk[]) => {
               setPanels((p) => ({
                 ...p,
-                [backend]: { ...p[backend], sources: chunks, status: "generating" },
+                [backend]: {
+                  ...p[backend],
+                  sources: chunks,
+                  status: "generating",
+                },
               }));
             },
             onToken: (text: string) => {
               answerRefs.current[backend] += text;
-              // Throttle to animation frames
               if (!rafRefs.current[backend]) {
                 rafRefs.current[backend] = requestAnimationFrame(() => {
-                  const currentText = answerRefs.current[backend];
+                  const current = answerRefs.current[backend];
                   setPanels((p) => ({
                     ...p,
-                    [backend]: { ...p[backend], answer: currentText },
+                    [backend]: { ...p[backend], answer: current },
                   }));
                   rafRefs.current[backend] = null;
                 });
@@ -90,11 +102,14 @@ export default function HomePage() {
               }));
             },
             onDone: () => {
-              // Final flush
               const finalText = answerRefs.current[backend];
               setPanels((p) => ({
                 ...p,
-                [backend]: { ...p[backend], answer: finalText, status: "done" },
+                [backend]: {
+                  ...p[backend],
+                  answer: finalText,
+                  status: "done",
+                },
               }));
             },
             onError: (msg: string) => {
@@ -114,7 +129,10 @@ export default function HomePage() {
     [mode]
   );
 
-  function handleSubmit(overrideQuery?: string, overrideFilters?: SearchFilter) {
+  function handleSubmit(
+    overrideQuery?: string,
+    overrideFilters?: SearchFilter
+  ) {
     executeQuery(overrideQuery ?? query, overrideFilters ?? filters);
   }
 
@@ -124,24 +142,36 @@ export default function HomePage() {
     executeQuery(text, f ?? filters);
   }
 
-  // ─── Hero state (no query yet) ───
+  // ─── Hero state ───
   if (!hasQueried) {
     return (
-      <div className="dot-grid flex min-h-screen flex-col items-center justify-center px-4">
-        <div className="w-full max-w-2xl space-y-8 animate-fade-up">
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-4 overflow-hidden">
+        {/* Video background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src="/hero-bg.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 hero-gradient" />
+
+        <div className="relative z-10 w-full max-w-2xl space-y-10 animate-fade-up">
           {/* Brand */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-3">
             <h1
-              className="text-5xl tracking-tight text-slate-100"
+              className="text-6xl sm:text-7xl tracking-tight text-text"
               style={{ fontFamily: "var(--font-display), serif" }}
             >
               Sherlock
             </h1>
-            <p className="text-sm text-slate-500">
-              RAG architecture comparison — Pinecone vs pgvector
+            <p className="text-[15px] text-text-secondary">
+              Comparación de arquitecturas RAG para búsqueda legal Fintech
             </p>
-            <p className="text-xs text-slate-600">
-              222 documentos legales Fintech &middot; 8 verticales &middot; Colombia
+            <p className="text-[12px] text-text-tertiary">
+              222 documentos &middot; 8 verticales &middot; Pinecone vs pgvector
             </p>
           </div>
 
@@ -151,40 +181,45 @@ export default function HomePage() {
               e.preventDefault();
               handleSubmit();
             }}
-            className="relative"
           >
-            <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-600" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Consulta legal Fintech…"
-              autoFocus
-              className="w-full rounded-xl border border-border bg-card/80 py-4 pl-12 pr-28 text-sm text-slate-100 outline-none placeholder:text-slate-600 focus:border-border-bright transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={!query.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-slate-950 transition-all hover:bg-accent-glow disabled:opacity-30"
-            >
-              Buscar
-            </button>
+            <div className="relative">
+              <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-text-tertiary" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Escribe una consulta legal Fintech…"
+                autoFocus
+                className="w-full rounded-2xl border border-border bg-white/80 py-4.5 pl-14 pr-32 text-[15px] text-text outline-none placeholder:text-text-tertiary focus:border-border-hover focus:bg-white card-shadow-hover transition-all"
+              />
+              <button
+                type="submit"
+                disabled={!query.trim()}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-xl bg-text px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:opacity-80 disabled:opacity-20"
+              >
+                Buscar
+              </button>
+            </div>
           </form>
 
           {/* Backend toggle */}
           <div className="flex justify-center">
-            <div className="flex rounded-lg border border-border bg-surface p-0.5">
+            <div className="inline-flex rounded-full border border-border bg-white/70 p-1 card-shadow">
               {(["both", "pinecone", "pgvector"] as const).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`rounded-md px-4 py-1.5 text-xs font-medium transition-all ${
+                  className={`rounded-full px-5 py-2 text-[12px] font-medium transition-all ${
                     mode === m
-                      ? "bg-card text-slate-200 shadow-sm"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-text text-white shadow-sm"
+                      : "text-text-secondary hover:text-text"
                   }`}
                 >
-                  {m === "both" ? "Ambos" : m === "pinecone" ? "Pinecone" : "pgvector"}
+                  {m === "both"
+                    ? "Ambos"
+                    : m === "pinecone"
+                      ? "Pinecone"
+                      : "pgvector"}
                 </button>
               ))}
             </div>
@@ -197,16 +232,16 @@ export default function HomePage() {
 
           {/* Suggestions */}
           <div className="animate-fade-up delay-3">
-            <p className="mb-3 text-center text-[10px] font-medium text-slate-600 uppercase tracking-widest">
+            <p className="mb-4 text-center text-[10px] font-medium text-text-tertiary uppercase tracking-[0.15em]">
               Consultas sugeridas
             </p>
             <QuerySuggestions onSelect={handleSuggestion} />
           </div>
         </div>
 
-        {/* Footer credit */}
-        <p className="fixed bottom-4 text-[10px] text-slate-700">
-          tensor.lat &middot; Pinecone &middot; Supabase &middot; Voyage AI &middot; Claude
+        {/* Footer */}
+        <p className="fixed bottom-5 text-[10px] text-text-tertiary tracking-wide z-10">
+          tensor.lat &middot; Claude &middot; Voyage AI &middot; Pinecone &middot; Supabase
         </p>
       </div>
     );
@@ -214,61 +249,68 @@ export default function HomePage() {
 
   // ─── Results state ───
   return (
-    <div className="dot-grid min-h-screen">
-      {/* Sticky header */}
-      <header className="sticky top-0 z-10 border-b border-border bg-base/90 backdrop-blur-lg">
-        <div className="mx-auto max-w-7xl px-4 py-3">
-          <div className="flex items-center gap-4">
-            {/* Brand (compact) */}
+    <div className="min-h-screen bg-surface/40">
+      {/* Sticky frosted header */}
+      <header className="sticky top-0 z-20 frosted border-b border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-5">
+            {/* Brand */}
             <button
               onClick={() => {
                 setHasQueried(false);
-                setPanels({ pinecone: INITIAL_PANEL, pgvector: INITIAL_PANEL });
+                setPanels({
+                  pinecone: INITIAL_PANEL,
+                  pgvector: INITIAL_PANEL,
+                });
               }}
               className="shrink-0"
             >
               <span
-                className="text-lg text-slate-300 hover:text-slate-100 transition-colors"
+                className="text-xl text-text hover:opacity-60 transition-opacity"
                 style={{ fontFamily: "var(--font-display), serif" }}
               >
                 Sherlock
               </span>
             </button>
 
-            {/* Search bar */}
+            {/* Search */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();
               }}
-              className="relative flex-1 max-w-xl"
+              className="relative flex-1 max-w-lg"
             >
-              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-600" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Consulta legal Fintech…"
-                className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-4 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-border-bright transition-colors"
+                className="w-full rounded-xl border border-border bg-white py-2.5 pl-10 pr-4 text-[13px] text-text outline-none placeholder:text-text-tertiary focus:border-border-hover transition-colors"
               />
               {isActive && (
-                <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-accent animate-spin" />
+                <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary animate-spin" />
               )}
             </form>
 
             {/* Backend toggle */}
-            <div className="hidden sm:flex rounded-lg border border-border bg-surface p-0.5">
+            <div className="hidden sm:flex rounded-full border border-border bg-white p-0.5">
               {(["both", "pinecone", "pgvector"] as const).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`rounded-md px-3 py-1 text-[11px] font-medium transition-all ${
+                  className={`rounded-full px-4 py-1.5 text-[11px] font-medium transition-all ${
                     mode === m
-                      ? "bg-card text-slate-200 shadow-sm"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-text text-white shadow-sm"
+                      : "text-text-secondary hover:text-text"
                   }`}
                 >
-                  {m === "both" ? "Ambos" : m === "pinecone" ? "Pinecone" : "pgvector"}
+                  {m === "both"
+                    ? "Ambos"
+                    : m === "pinecone"
+                      ? "Pinecone"
+                      : "pgvector"}
                 </button>
               ))}
             </div>
@@ -277,12 +319,12 @@ export default function HomePage() {
       </header>
 
       {/* Filter chips */}
-      <div className="mx-auto max-w-7xl px-4 py-3">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
         <FilterChips filters={filters} onChange={setFilters} />
       </div>
 
       {/* Results */}
-      <main className="mx-auto max-w-7xl px-4 pb-12">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-16">
         <ComparisonView panels={panels} backends={activeBackends} />
       </main>
     </div>
