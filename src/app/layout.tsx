@@ -31,6 +31,13 @@ export const metadata: Metadata = {
   description:
     "Comparación side-by-side de Pinecone vs pgvector para búsqueda legal Fintech colombiana. 222 documentos, 8 verticales.",
   authors: [{ name: "tensor.lat" }],
+  icons: { icon: "/favicon.svg" },
+  openGraph: {
+    title: "Sherlock — RAG Architecture Comparison",
+    description:
+      "Multi-embedding, reranking, agentic RAG. 222 docs, 8 Fintech verticals.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sherlock — RAG Architecture Comparison
 
-## Getting Started
+Side-by-side comparison of RAG architectures for Colombian Fintech legal search. 222 documents across 8 verticals.
 
-First, run the development server:
+**Live:** [sherlock-rag-demo.vercel.app](https://sherlock-rag-demo.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Comparison Axes
+
+| Axis | Options |
+|---|---|
+| **Vector Store** | Pinecone Serverless vs Supabase pgvector (HNSW) |
+| **Embeddings** | Voyage `voyage-3-large` vs OpenAI `text-embedding-3-large` |
+| **Reranking** | Cohere `rerank-v3.5` (optional) |
+| **LLM** | Claude Sonnet 4 (precise) vs Claude Haiku 4.5 (fast) |
+| **Mode** | Classic RAG vs Agentic RAG (tool use + multi-step reasoning) |
+
+## Architecture
+
+```
+Classic:  Query → Embed → Retrieve → (Rerank) → Stream Generate
+Agent:    Query → Claude thinks → Tool calls (1-3 searches) → Synthesize
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework:** Next.js 16 + TypeScript + Tailwind CSS 4
+- **LLM:** Claude Sonnet 4 / Haiku 4.5 (Anthropic SDK)
+- **Embeddings:** Voyage AI voyage-3-large + OpenAI text-embedding-3-large (1024d)
+- **Vector Stores:** Pinecone Serverless + Supabase pgvector
+- **Reranking:** Cohere rerank-v3.5
+- **Deploy:** Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Data
 
-## Learn More
+222 legal documents from 9 Excel source files covering 8 Fintech verticals:
+Credito Digital, Crowdfunding, Factoring, Insurtech, Neobancos, Pagos Digitales, RegTech, WealthTech.
 
-To learn more about Next.js, take a look at the following resources:
+## Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+cp .env.local.example .env.local  # Fill in API keys
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Data pipeline
+npx tsx scripts/parse-excel.ts
+npx tsx scripts/generate-embeddings.ts
+npx tsx scripts/generate-embeddings-openai.ts
+npx tsx scripts/ingest-pinecone.ts
+npx tsx scripts/ingest-pinecone-openai.ts
+npx tsx scripts/ingest-pgvector.ts
+npx tsx scripts/ingest-pgvector-openai.ts
 
-## Deploy on Vercel
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+ANTHROPIC_API_KEY=
+VOYAGE_API_KEY=
+OPENAI_API_KEY=
+COHERE_API_KEY=
+PINECONE_API_KEY=
+PINECONE_INDEX=sherlock-fintech
+PINECONE_INDEX_OPENAI=sherlock-openai
+NEXT_PUBLIC_SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+## API Endpoints
+
+- `POST /api/chat` — Classic RAG streaming (NDJSON)
+- `POST /api/agent` — Agentic RAG with tool use (NDJSON)
+- `GET /api/health` — Configuration health check
+
+---
+
+Built by [tensor.lat](https://tensor.lat) for [REDEK](https://redek.co)

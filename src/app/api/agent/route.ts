@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { runAgent } from "@/lib/rag/agent";
+import type { ConversationMessage } from "@/lib/rag/agent";
 import type { EmbeddingProvider } from "@/lib/rag/embeddings";
 import type { LLMSpeed } from "@/lib/rag/claude";
 
@@ -13,6 +14,9 @@ export async function POST(request: NextRequest) {
     const embedding = (body.embedding || "voyage") as string;
     const speed = (body.speed || "sonnet") as string;
     const rerank = body.rerank === true;
+    const conversation: ConversationMessage[] = Array.isArray(body.conversation)
+      ? body.conversation.slice(-6) // Keep last 3 exchanges max
+      : [];
 
     if (!query) {
       return Response.json({ error: "Missing query" }, { status: 400 });
@@ -33,20 +37,16 @@ export async function POST(request: NextRequest) {
             query,
             embedding as EmbeddingProvider,
             speed as LLMSpeed,
-            rerank
+            rerank,
+            conversation
           )) {
-            controller.enqueue(
-              encoder.encode(JSON.stringify(event) + "\n")
-            );
+            controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
           }
           controller.close();
         } catch (err) {
-          const message =
-            err instanceof Error ? err.message : "Unknown error";
+          const message = err instanceof Error ? err.message : "Unknown error";
           controller.enqueue(
-            encoder.encode(
-              JSON.stringify({ type: "error", message }) + "\n"
-            )
+            encoder.encode(JSON.stringify({ type: "error", message }) + "\n")
           );
           controller.close();
         }

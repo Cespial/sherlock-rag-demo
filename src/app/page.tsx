@@ -92,6 +92,9 @@ export default function HomePage() {
     pgvector: INITIAL_PANEL,
   });
   const [agentState, setAgentState] = useState<AgentPanelState>(INITIAL_AGENT);
+  const [conversation, setConversation] = useState<
+    { role: "user" | "assistant"; content: string }[]
+  >([]);
   const abortRef = useRef<AbortController | null>(null);
   const answerRefs = useRef<Record<string, string>>({
     pinecone: "",
@@ -123,7 +126,13 @@ export default function HomePage() {
         const res = await fetch("/api/agent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: q, embedding, speed, rerank }),
+          body: JSON.stringify({
+            query: q,
+            embedding,
+            speed,
+            rerank,
+            conversation,
+          }),
           signal: controller.signal,
         });
 
@@ -180,6 +189,15 @@ export default function HomePage() {
             steps: [...s.steps, { type: "step", step: e.step } as AgentStep],
           }));
           break;
+        case "thinking":
+          setAgentState((s) => ({
+            ...s,
+            steps: [
+              ...s.steps,
+              { type: "thinking", text: e.text } as AgentStep,
+            ],
+          }));
+          break;
         case "tool_call":
           setAgentState((s) => ({
             ...s,
@@ -223,13 +241,21 @@ export default function HomePage() {
         case "metrics":
           setAgentState((s) => ({ ...s, metrics: e.timings }));
           break;
-        case "done":
+        case "done": {
+          const finalAnswer = answerRefs.current.agent;
           setAgentState((s) => ({
             ...s,
             status: "done",
-            answer: answerRefs.current.agent,
+            answer: finalAnswer,
           }));
+          // Save to conversation history
+          setConversation((prev) => [
+            ...prev,
+            { role: "user" as const, content: query },
+            { role: "assistant" as const, content: finalAnswer },
+          ]);
           break;
+        }
         case "error":
           setAgentState((s) => ({
             ...s,
@@ -329,6 +355,7 @@ export default function HomePage() {
     setHasQueried(false);
     setPanels({ pinecone: INITIAL_PANEL, pgvector: INITIAL_PANEL });
     setAgentState(INITIAL_AGENT);
+    setConversation([]);
   }
 
   const controlsBar = (
@@ -445,7 +472,7 @@ export default function HomePage() {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-16 pt-4">
         {mode === "agent" ? (
-          <AgentPanel state={agentState} />
+          <AgentPanel state={agentState} conversation={conversation} />
         ) : (
           <ComparisonView panels={panels} backends={activeBackends} />
         )}
