@@ -5,25 +5,52 @@ const anthropic = new Anthropic();
 
 const SYSTEM_PROMPT = `Eres Sherlock, un asistente legal especializado en regulación Fintech colombiana.
 
-REGLAS:
-1. Responde ÚNICAMENTE con base en los fragmentos proporcionados como contexto.
-2. Si la información no está en el contexto, dilo claramente: "No encontré información relevante sobre ese tema en los documentos disponibles."
-3. Cita las fuentes usando [Fuente N] donde N corresponde al número del fragmento.
-4. Responde en español.
-5. Sé preciso y conciso. Los usuarios son abogados o reguladores que necesitan respuestas claras.
-6. Si hay términos equivalentes relevantes, menciónalos para ampliar el contexto.
-7. Usa formato Markdown: headers, listas, **negritas** para conceptos clave.`;
+Tu base de conocimiento son extractos de documentos legales (leyes, decretos, circulares, conceptos) organizados por vertical Fintech: Crédito Digital, Crowdfunding, Factoring, Insurtech, Neobancos, Pagos Digitales, RegTech, WealthTech.
 
+REGLAS:
+1. Responde ÚNICAMENTE con base en los fragmentos proporcionados. Si la información no está en el contexto, dilo: "No encontré información sobre ese tema en los documentos disponibles."
+2. Cita las fuentes: [1], [2], etc. correspondiendo al número del fragmento.
+3. Responde en español, usando Markdown (## headers, **negritas**, listas).
+4. Sé preciso y directo. Máximo 3-4 párrafos. Los usuarios son abogados y reguladores.
+5. Cuando un fragmento liste términos equivalentes, menciona los más relevantes para dar contexto al lector.
+6. Si múltiples fuentes cubren el mismo tema, sintetiza en vez de repetir.`;
+
+/**
+ * Build optimized context for Claude.
+ *
+ * Key insight: many "extracto" values are just section headers (e.g. "9.1.1 DEFINICIÓN Y ALCANCE").
+ * The real content is in terminosRelacionados and terminosEquivalentes.
+ * We structure the context to put the rich content first.
+ */
 function buildContext(chunks: RetrievedChunk[]): string {
   return chunks
-    .map(
-      (c, i) =>
-        `[${i + 1}] Tema: ${c.metadata.tema} | Subtema: ${c.metadata.subtema}
-Extracto: ${c.metadata.extracto}
-Doc: ${c.metadata.documentoOrigen} | Tipo: ${c.metadata.filtroTipo} | Autoridad: ${c.metadata.filtroAutoridad} | Año: ${c.metadata.filtroAno}
-Términos: ${c.metadata.terminosRelacionados.slice(0, 200)}
-Equivalencias: ${c.metadata.terminosEquivalentes.slice(0, 200)}`
-    )
+    .map((c, i) => {
+      const m = c.metadata;
+      const lines: string[] = [];
+
+      // Header: number + vertical + subtema
+      lines.push(`[${i + 1}] ${m.tema} — ${m.subtema || m.extracto}`);
+
+      // Source reference (compact)
+      const meta: string[] = [];
+      if (m.documentoOrigen) meta.push(m.documentoOrigen);
+      if (m.filtroTipo) meta.push(m.filtroTipo);
+      if (m.filtroAutoridad) meta.push(m.filtroAutoridad);
+      if (m.filtroAno) meta.push(m.filtroAno);
+      if (meta.length > 0) lines.push(`Fuente: ${meta.join(" · ")}`);
+
+      // Main content: términos relacionados (the actual legal substance)
+      if (m.terminosRelacionados) {
+        lines.push(`Conceptos clave: ${m.terminosRelacionados}`);
+      }
+
+      // Equivalences (useful for cross-referencing)
+      if (m.terminosEquivalentes) {
+        lines.push(`Equivalencias: ${m.terminosEquivalentes}`);
+      }
+
+      return lines.join("\n");
+    })
     .join("\n\n---\n\n");
 }
 
@@ -35,8 +62,6 @@ export async function generateAnswer(
     return "No se encontraron documentos relevantes para tu consulta. Intenta reformular la pregunta o ajustar los filtros.";
   }
 
-  const context = buildContext(chunks);
-
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 768,
@@ -44,16 +69,13 @@ export async function generateAnswer(
     messages: [
       {
         role: "user",
-        content: `CONTEXTO:\n\n${context}\n\n---\n\nPREGUNTA: ${query}`,
+        content: `CONTEXTO:\n\n${buildContext(chunks)}\n\n---\n\nPREGUNTA: ${query}`,
       },
     ],
   });
 
   const block = message.content[0];
-  if (block.type === "text") {
-    return block.text;
-  }
-  return "Error: respuesta inesperada del modelo.";
+  return block.type === "text" ? block.text : "Error: respuesta inesperada.";
 }
 
 export async function* streamAnswer(

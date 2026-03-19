@@ -9,6 +9,35 @@ interface StreamCallbacks {
   onError: (msg: string) => void;
 }
 
+function processLine(line: string, callbacks: StreamCallbacks) {
+  if (!line.trim()) return;
+  try {
+    const event = JSON.parse(line);
+    switch (event.type) {
+      case "embedding":
+        callbacks.onEmbedding(event.ms);
+        break;
+      case "sources":
+        callbacks.onSources(event.chunks, event.retrieval_ms);
+        break;
+      case "token":
+        callbacks.onToken(event.text);
+        break;
+      case "metrics":
+        callbacks.onMetrics(event.timings);
+        break;
+      case "done":
+        callbacks.onDone();
+        break;
+      case "error":
+        callbacks.onError(event.message);
+        break;
+    }
+  } catch {
+    // Skip malformed JSON lines
+  }
+}
+
 export async function streamRAGQuery(
   query: string,
   backend: "pinecone" | "pgvector",
@@ -16,6 +45,15 @@ export async function streamRAGQuery(
   callbacks: StreamCallbacks,
   signal?: AbortSignal
 ): Promise<void> {
+  let errorCalled = false;
+
+  function safeError(msg: string) {
+    if (!errorCalled) {
+      errorCalled = true;
+      callbacks.onError(msg);
+    }
+  }
+
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,7 +69,7 @@ export async function streamRAGQuery(
     } catch {
       // ignore
     }
-    callbacks.onError(msg);
+    safeError(msg);
     return;
   }
 
@@ -42,44 +80,28 @@ export async function streamRAGQuery(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+
+      if (done) {
+        // Flush remaining decoder state
+        buffer += decoder.decode();
+        // Process any remaining data in buffer
+        if (buffer.trim()) {
+          processLine(buffer, callbacks);
+        }
+        break;
+      }
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
       buffer = lines.pop()!;
 
       for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const event = JSON.parse(line);
-          switch (event.type) {
-            case "embedding":
-              callbacks.onEmbedding(event.ms);
-              break;
-            case "sources":
-              callbacks.onSources(event.chunks, event.retrieval_ms);
-              break;
-            case "token":
-              callbacks.onToken(event.text);
-              break;
-            case "metrics":
-              callbacks.onMetrics(event.timings);
-              break;
-            case "done":
-              callbacks.onDone();
-              break;
-            case "error":
-              callbacks.onError(event.message);
-              break;
-          }
-        } catch {
-          // Skip malformed lines
-        }
+        processLine(line, callbacks);
       }
     }
   } catch (err) {
     if ((err as Error).name !== "AbortError") {
-      callbacks.onError((err as Error).message);
+      safeError((err as Error).message);
     }
   }
 }

@@ -13,16 +13,16 @@ function getClient() {
 export async function searchPinecone(
   queryVector: number[],
   filters: SearchFilter,
-  topK = 8
+  topK = 5
 ): Promise<RetrievedChunk[]> {
   const pc = getClient();
   const index = pc.index(process.env.PINECONE_INDEX || "sherlock-fintech");
 
   const filterObj: Record<string, { $eq: string }> = {};
   if (filters.tema) filterObj.tema = { $eq: filters.tema };
-  if (filters.tipo) filterObj.tipo = { $eq: filters.tipo };
-  if (filters.autoridad) filterObj.autoridad = { $eq: filters.autoridad };
-  if (filters.ano) filterObj.ano = { $eq: filters.ano };
+  if (filters.tipo) filterObj.filtroTipo = { $eq: filters.tipo };
+  if (filters.autoridad) filterObj.filtroAutoridad = { $eq: filters.autoridad };
+  if (filters.ano) filterObj.filtroAno = { $eq: filters.ano };
 
   const results = await index.query({
     vector: queryVector,

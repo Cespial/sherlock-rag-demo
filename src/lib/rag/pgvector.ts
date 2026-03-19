@@ -11,7 +11,7 @@ function getClient() {
 export async function searchPgvector(
   queryVector: number[],
   filters: SearchFilter,
-  topK = 8
+  topK = 5
 ): Promise<RetrievedChunk[]> {
   const supabase = getClient();
 

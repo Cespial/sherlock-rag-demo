@@ -5,11 +5,18 @@ import { searchPgvector } from "@/lib/rag/pgvector";
 import { streamAnswer } from "@/lib/rag/claude";
 import type { SearchFilter } from "@/lib/rag/types";
 
-interface ChatRequest {
-  query: string;
-  backend: "pinecone" | "pgvector";
-  filters?: SearchFilter;
-  topK?: number;
+const VALID_BACKENDS = new Set(["pinecone", "pgvector"]);
+const ALLOWED_FILTER_KEYS = new Set(["tema", "tipo", "autoridad", "ano"]);
+
+function sanitizeFilters(raw: Record<string, unknown>): SearchFilter {
+  const clean: SearchFilter = {};
+  for (const key of ALLOWED_FILTER_KEYS) {
+    const val = raw[key];
+    if (typeof val === "string" && val.trim()) {
+      (clean as Record<string, string>)[key] = val.trim();
+    }
+  }
+  return clean;
 }
 
 function sendEvent(
@@ -22,12 +29,19 @@ function sendEvent(
 
 export async function POST(request: NextRequest) {
   try {
-    const body: ChatRequest = await request.json();
-    const { query, backend, filters = {}, topK = 5 } = body;
+    const body = await request.json();
+    const query = typeof body.query === "string" ? body.query.trim() : "";
+    const backend = body.backend as string;
+    const rawTopK = typeof body.topK === "number" ? body.topK : 5;
+    const topK = Math.min(20, Math.max(1, Math.round(rawTopK)));
+    const filters = sanitizeFilters(body.filters || {});
 
-    if (!query || !backend) {
+    if (!query) {
+      return Response.json({ error: "Missing query" }, { status: 400 });
+    }
+    if (!VALID_BACKENDS.has(backend)) {
       return Response.json(
-        { error: "Missing query or backend" },
+        { error: "Invalid backend. Use 'pinecone' or 'pgvector'." },
         { status: 400 }
       );
     }
@@ -54,7 +68,7 @@ export async function POST(request: NextRequest) {
               : await searchPgvector(queryVector, filters, topK);
           const retrievalMs = performance.now() - t1;
 
-          // Strip embeddingText from chunks sent to client
+          // Strip embeddingText from chunks sent to client (save bandwidth)
           const clientChunks = chunks.map((c) => ({
             ...c,
             metadata: { ...c.metadata, embeddingText: "" },
