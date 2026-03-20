@@ -17,6 +17,7 @@ import type {
 import { INITIAL_PANEL } from "@/lib/rag/types";
 import type { EmbeddingProvider } from "@/lib/rag/embeddings";
 import type { LLMSpeed } from "@/lib/rag/claude";
+import type { RAGStrategy } from "@/lib/rag/strategies";
 import { Search, Loader2 } from "lucide-react";
 
 type BackendMode = "both" | "pinecone" | "pgvector" | "agent";
@@ -85,6 +86,7 @@ export default function HomePage() {
   const [embedding, setEmbedding] = useState<EmbeddingProvider>("voyage");
   const [rerank, setRerank] = useState(false);
   const [speed, setSpeed] = useState<LLMSpeed>("sonnet");
+  const [strategy, setStrategy] = useState<RAGStrategy>("classic");
   const [hasQueried, setHasQueried] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [panels, setPanels] = useState<Record<string, PanelState>>({
@@ -288,6 +290,7 @@ export default function HomePage() {
         embedding,
         rerank,
         speed,
+        strategy,
       };
 
       const reset: Record<string, PanelState> = {};
@@ -307,6 +310,12 @@ export default function HomePage() {
               setPanels((p) => ({ ...p, [backend]: { ...p[backend], sources: chunks, status: "generating" } })),
             onRerank: () =>
               setPanels((p) => ({ ...p, [backend]: { ...p[backend], status: "reranking" } })),
+            onRoute: (strat: string, reason: string) =>
+              setPanels((p) => ({ ...p, [backend]: { ...p[backend], routeDecision: { strategy: strat, reason } } })),
+            onHydeDoc: (text: string) =>
+              setPanels((p) => ({ ...p, [backend]: { ...p[backend], hydeDoc: text } })),
+            onMultiQueries: (queries: string[]) =>
+              setPanels((p) => ({ ...p, [backend]: { ...p[backend], multiQueries: queries } })),
             onToken: (text: string) => {
               answerRefs.current[backend] += text;
               if (!rafRefs.current[backend]) {
@@ -325,7 +334,7 @@ export default function HomePage() {
             onError: (msg: string) =>
               setPanels((p) => ({ ...p, [backend]: { ...p[backend], status: "error", error: msg } })),
           },
-          { embedding, rerank, speed },
+          { embedding, rerank, speed, strategy },
           controller.signal
         )
       );
@@ -333,7 +342,7 @@ export default function HomePage() {
       await Promise.allSettled(promises);
       setIsActive(false);
     },
-    [mode, embedding, rerank, speed]
+    [mode, embedding, rerank, speed, strategy]
   );
 
   function handleSubmit(overrideQuery?: string, overrideFilters?: SearchFilter) {
@@ -371,6 +380,19 @@ export default function HomePage() {
           agent: "Agente",
         }}
       />
+      {mode !== "agent" && (
+        <Toggle
+          options={["classic", "hyde", "multiquery", "router"] as RAGStrategy[]}
+          value={strategy}
+          onChange={setStrategy}
+          labels={{
+            classic: "Classic",
+            hyde: "HyDE",
+            multiquery: "Multi-Q",
+            router: "Router",
+          }}
+        />
+      )}
       <Toggle
         options={["voyage", "openai"] as EmbeddingProvider[]}
         value={embedding}

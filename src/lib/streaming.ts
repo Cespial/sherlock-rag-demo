@@ -1,6 +1,7 @@
 import type { RetrievedChunk, SearchFilter, StageTimings } from "./rag/types";
 import type { EmbeddingProvider } from "./rag/embeddings";
 import type { LLMSpeed } from "./rag/claude";
+import type { RAGStrategy } from "./rag/strategies";
 
 interface StreamCallbacks {
   onEmbedding: (ms: number) => void;
@@ -10,6 +11,9 @@ interface StreamCallbacks {
   onMetrics: (timings: StageTimings) => void;
   onDone: () => void;
   onError: (msg: string) => void;
+  onRoute?: (strategy: string, reason: string, ms: number) => void;
+  onHydeDoc?: (text: string, ms: number) => void;
+  onMultiQueries?: (queries: string[], ms: number) => void;
 }
 
 function processLine(line: string, callbacks: StreamCallbacks) {
@@ -38,6 +42,15 @@ function processLine(line: string, callbacks: StreamCallbacks) {
       case "error":
         callbacks.onError(event.message);
         break;
+      case "route":
+        callbacks.onRoute?.(event.strategy, event.reason, event.ms);
+        break;
+      case "hyde_doc":
+        callbacks.onHydeDoc?.(event.text, event.ms);
+        break;
+      case "multi_queries":
+        callbacks.onMultiQueries?.(event.queries, event.ms);
+        break;
     }
   } catch {
     // Skip malformed JSON
@@ -53,6 +66,7 @@ export async function streamRAGQuery(
     embedding?: EmbeddingProvider;
     rerank?: boolean;
     speed?: LLMSpeed;
+    strategy?: RAGStrategy;
     topK?: number;
   } = {},
   signal?: AbortSignal
@@ -75,6 +89,7 @@ export async function streamRAGQuery(
       embedding: options.embedding || "voyage",
       rerank: options.rerank || false,
       speed: options.speed || "sonnet",
+      strategy: options.strategy || "classic",
       topK: options.topK || 5,
     }),
     signal,
@@ -85,9 +100,7 @@ export async function streamRAGQuery(
     try {
       const data = await res.json();
       msg = data.error || msg;
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
     safeError(msg);
     return;
   }

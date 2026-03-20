@@ -32,6 +32,7 @@ export interface StageTimings {
   embedding_ms: number;
   retrieval_ms: number;
   rerank_ms?: number;
+  strategy_ms?: number;
   generation_ms: number;
   total_ms: number;
 }
@@ -49,6 +50,7 @@ export interface QueryConfig {
   embedding: EmbeddingProvider;
   rerank: boolean;
   speed: LLMSpeed;
+  strategy?: string;
 }
 
 // Streaming event types (NDJSON)
@@ -69,6 +71,10 @@ export interface PanelState {
   timings: StageTimings | null;
   error: string | null;
   config?: QueryConfig;
+  // Strategy-specific info
+  routeDecision?: { strategy: string; reason: string };
+  hydeDoc?: string;
+  multiQueries?: string[];
 }
 
 export const INITIAL_PANEL: PanelState = {
