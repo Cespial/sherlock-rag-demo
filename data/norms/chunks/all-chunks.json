@@ -29489,5 +29489,140 @@
     "articleTitle": "Texto completo",
     "content": "<!doctype html> No disponible - Gestor Normativo - Función Pública //Cambiar tamaño fuente function cambia_tamano_fuente(accion){ <!-- console.log('Entró a cambia_tamano_fuente'); --> var vcontenido; //div que contiene el texto de la norma var divspag = document.getElementsByTagName('div'); //descripcion-contenido for ( var j = 0; j < divspag.length; j++) { <!-- console.log('className: ' + divspag[j].className); --> if(divspag[j].className == 'descripcion-contenido'){ vcontenido = divspag[j]; } } <!-- console.log('ENCONTRADO!!!!: ' + vcontenido.className); --> var elementos_parrafo = vcontenido.getElementsByTagName('p'); var tam_actual; for ( var i = 0; i < elementos_parrafo.length; i++) { <!-- console.log(elementos_parrafo[i].style.fontSize); --> tam_actual = parseInt(elementos_parrafo[i].style.fontSize.replace('px','')); <!-- console.log('tam_actual:' + tam_actual); --> if(Number.isNaN(tam_actual)) tam_actual = 16; <!-- console.log('tam_actual:' + tam_actual); --> if(accion=='aumenta'){ elementos_parrafo[i].style.fontSize = (tam_actual + 1) + 'px'; } if(accion=='reduce'){ elementos_parrafo[i].style.fontSize = (tam_actual - 1) + 'px'; } } } p { margin-top: 1rem; margin-bottom: 1rem; } INGRESAR A LA INTRANET A+ A- EVA Publicaciones Gestor Normativo Red de servidores Cursos virtuales Curso de integridad Programa de inducción y reinducción Curso para Veedurías Ciudadanas Curso para Gerentes PÃºblicos Curso MIPG Curso de Empleo PÃºblico Formatos Contáctenos Preguntas frecuentes EVA Gestor Normativo Normas de la Función Pública function eliminateDuplicates(arr) { //console.log(arr); var i, len=arr.length, out=[], obj={}; for (i=len-1;i>=0;i--) { obj[arr[i]]=0; } //console.log(obj); for (i in obj) { out.push(i); //console.log(i); } out.reverse(); return out; } if (sessionStorage.migapan) { sessionStorage.migapan = sessionStorage.migapan + ''; var normas = sessionStorage.migapan.split('+'); normas = eliminateDuplicates(normas); sessionStorage.migapan = normas.join('+'); } else { sessionStorage.migapan = '|'; } var migadepan = sessionStorage.migapan.split(\"+\"); var txt_miga='<li><a href=\"/web/eva\">Inicio</a></li><li><a href=\"/web/eva/gestor-normativo\">Gestor Normativo</a></li><li><a href=\"consulta-avanzada.jsp\">Consulta</a></li>'; for (j=0;j<migadepan.length;j++) { var xnorma=migadepan[j].split(\"|\"); txt_miga+='<li><a href=\"/eva/gestornormativo/norma.php?i='+xnorma[1]+'\">'+xnorma[0]+'</a></li>'; } document.getElementById(\"spanmiga\").innerHTML=txt_miga; × Esta página no está disponible, la norma puede que ya no este disponible o se ha utilizado un enlace erróneo Intente nuevamente con la búsqueda de la avanzada de normas",
     "embeddingText": "<!doctype html> No disponible - Gestor Normativo - Función Pública //Cambiar tamaño fuente function cambia_tamano_fuente(accion){ <!-- console.log('Entró a cambia_tamano_fuente'); --> var vcontenido; //div que contiene el texto de la norma var divspag = document.getElementsByTagName('div'); //descripcion-contenido for ( var j = 0; j < divspag.length; j++) { <!-- console.log('className: ' + divspag[j].className); --> if(divspag[j].className == 'descripcion-contenido'){ vcontenido = divspag[j]; } } <!-- console.log('ENCONTRADO!!!!: ' + vcontenido.className); --> var elementos_parrafo = vcontenido.getElementsByTagName('p'); var tam_actual; for ( var i = 0; i < elementos_parrafo.length; i++) { <!-- console.log(elementos_parrafo[i].style.fontSize); --> tam_actual = parseInt(elementos_parrafo[i]\n\nNorma: Decreto 1732 de 2021 — Sandbox Multisectorial\nArtículo: general — Texto completo\nTipo: decreto | Autoridad: MinComercio | Año: 2021\nTemas: Sandbox"
+  },
+  {
+    "id": "ce-004-2024-sfc-p1",
+    "normId": "ce-004-2024-sfc",
+    "normName": "CE 004 de 2024 SFC — Finanzas Abiertas",
+    "year": 2024,
+    "authority": "SFC",
+    "type": "circular",
+    "temas": [
+      "Open Banking"
+    ],
+    "articleNum": "p1",
+    "articleTitle": "Parte 1",
+    "content": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the list of all known attributes and exit\n -X            Print the schema file and exit\n -L            Print the list of known plug-ins which can be used by Spotlight\n -r            Ask the server to reimport files for UTIs claimed by plug-in at 'path'\n -e            Print all the modern importers available\n -m            Import files using modern importers.",
+    "embeddingText": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the\n\nNorma: CE 004 de 2024 SFC — Finanzas Abiertas\nArtículo: p1 — Parte 1\nTipo: circular | Autoridad: SFC | Año: 2024\nTemas: Open Banking"
+  },
+  {
+    "id": "ce-004-2024-sfc-p2",
+    "normId": "ce-004-2024-sfc",
+    "normName": "CE 004 de 2024 SFC — Finanzas Abiertas",
+    "year": 2024,
+    "authority": "SFC",
+    "type": "circular",
+    "temas": [
+      "Open Banking"
+    ],
+    "articleNum": "p2",
+    "articleTitle": "Parte 2",
+    "content": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t",
+    "embeddingText": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t\n\nNorma: CE 004 de 2024 SFC — Finanzas Abiertas\nArtículo: p2 — Parte 2\nTipo: circular | Autoridad: SFC | Año: 2024\nTemas: Open Banking"
+  },
+  {
+    "id": "ce-029-2024-sfc-p1",
+    "normId": "ce-029-2024-sfc",
+    "normName": "CE 029 de 2024 SFC — Ciber-resiliencia",
+    "year": 2024,
+    "authority": "SFC",
+    "type": "circular",
+    "temas": [
+      "Ciberseguridad"
+    ],
+    "articleNum": "p1",
+    "articleTitle": "Parte 1",
+    "content": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the list of all known attributes and exit\n -X            Print the schema file and exit\n -L            Print the list of known plug-ins which can be used by Spotlight\n -r            Ask the server to reimport files for UTIs claimed by plug-in at 'path'\n -e            Print all the modern importers available\n -m            Import files using modern importers.",
+    "embeddingText": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the\n\nNorma: CE 029 de 2024 SFC — Ciber-resiliencia\nArtículo: p1 — Parte 1\nTipo: circular | Autoridad: SFC | Año: 2024\nTemas: Ciberseguridad"
+  },
+  {
+    "id": "ce-029-2024-sfc-p2",
+    "normId": "ce-029-2024-sfc",
+    "normName": "CE 029 de 2024 SFC — Ciber-resiliencia",
+    "year": 2024,
+    "authority": "SFC",
+    "type": "circular",
+    "temas": [
+      "Ciberseguridad"
+    ],
+    "articleNum": "p2",
+    "articleTitle": "Parte 2",
+    "content": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t",
+    "embeddingText": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t\n\nNorma: CE 029 de 2024 SFC — Ciber-resiliencia\nArtículo: p2 — Parte 2\nTipo: circular | Autoridad: SFC | Año: 2024\nTemas: Ciberseguridad"
+  },
+  {
+    "id": "res-ext-6-2023-banrep-p1",
+    "normId": "res-ext-6-2023-banrep",
+    "normName": "Resolución Externa 6 de 2023 BanRep — Pagos Inmediatos",
+    "year": 2023,
+    "authority": "Banco de la República",
+    "type": "resolucion",
+    "temas": [
+      "Pagos Digitales"
+    ],
+    "articleNum": "p1",
+    "articleTitle": "Parte 1",
+    "content": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the list of all known attributes and exit\n -X            Print the schema file and exit\n -L            Print the list of known plug-ins which can be used by Spotlight\n -r            Ask the server to reimport files for UTIs claimed by plug-in at 'path'\n -e            Print all the modern importers available\n -m            Import files using modern importers.",
+    "embeddingText": "Usage: mdimport [options] path {path...}\n -i            recursively import files at 'path', sending results to Spotlight index\n               (implied if no other option is specified)\n -t            spotlight server will test-import the specific file, but not send the\n               results to the Spotlight index\n -d level      output information from test-import. Requires -t\n                   -d1  print summary of test-import to console\n                   -d2  print summary and imported attributes, except kMDItemTextContent, to console\n                   -d3  print summary and all imported attributes to console\n -o outfile    save test-import attributes to 'outfile'. Requires -t\n -p            Print performance information gathered during test-import. Requires -t\n -A            Print the\n\nNorma: Resolución Externa 6 de 2023 BanRep — Pagos Inmediatos\nArtículo: p1 — Parte 1\nTipo: resolucion | Autoridad: Banco de la República | Año: 2023\nTemas: Pagos Digitales"
+  },
+  {
+    "id": "res-ext-6-2023-banrep-p2",
+    "normId": "res-ext-6-2023-banrep",
+    "normName": "Resolución Externa 6 de 2023 BanRep — Pagos Inmediatos",
+    "year": 2023,
+    "authority": "Banco de la República",
+    "type": "resolucion",
+    "temas": [
+      "Pagos Digitales"
+    ],
+    "articleNum": "p2",
+    "articleTitle": "Parte 2",
+    "content": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t",
+    "embeddingText": "Specify the file type via -y and then the file url(s) via -u (separated by space) \n -y type       Type of the file. Requires -m\n -u urls       URLs for the files. Requires -m\n\nTo test an importer plug-in, it must be correctly installed and findable by Spotlight. options -d, -p, and -o require option -t\n\nNorma: Resolución Externa 6 de 2023 BanRep — Pagos Inmediatos\nArtículo: p2 — Parte 2\nTipo: resolucion | Autoridad: Banco de la República | Año: 2023\nTemas: Pagos Digitales"
+  },
+  {
+    "id": "res-042-2020-dian-p1",
+    "normId": "res-042-2020-dian",
+    "normName": "Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica",
+    "year": 2020,
+    "authority": "DIAN",
+    "type": "resolucion",
+    "temas": [
+      "Factoring"
+    ],
+    "articleNum": "p1",
+    "articleTitle": "Parte 1",
+    "content": "<!doctype html> No disponible - Gestor Normativo - Función Pública //Cambiar tamaño fuente function cambia_tamano_fuente(accion){ <!-- console.log('Entró a cambia_tamano_fuente'); --> var vcontenido; //div que contiene el texto de la norma var divspag = document.getElementsByTagName('div'); //descripcion-contenido for ( var j = 0; j < divspag.length; j++) { <!-- console.log('className: ' + divspag[j].className); --> if(divspag[j].className == 'descripcion-contenido'){ vcontenido = divspag[j]; } } <!-- console.log('ENCONTRADO!!!!: ' + vcontenido.className); --> var elementos_parrafo = vcontenido.getElementsByTagName('p'); var tam_actual; for ( var i = 0; i < elementos_parrafo.length; i++) { <!-- console.log(elementos_parrafo[i].style.fontSize); --> tam_actual = parseInt(elementos_parrafo[i].style.fontSize.replace('px','')); <!-- console.log('tam_actual:' + tam_actual); --> if(Number.isNaN(tam_actual)) tam_actual = 16; <!-- console.log('tam_actual:' + tam_actual); --> if(accion=='aumenta'){ elementos_parrafo[i].style.fontSize = (tam_actual + 1) + 'px';",
+    "embeddingText": "<!doctype html> No disponible - Gestor Normativo - Función Pública //Cambiar tamaño fuente function cambia_tamano_fuente(accion){ <!-- console.log('Entró a cambia_tamano_fuente'); --> var vcontenido; //div que contiene el texto de la norma var divspag = document.getElementsByTagName('div'); //descripcion-contenido for ( var j = 0; j < divspag.length; j++) { <!-- console.log('className: ' + divspag[j].className); --> if(divspag[j].className == 'descripcion-contenido'){ vcontenido = divspag[j]; } } <!-- console.log('ENCONTRADO!!!!: ' + vcontenido.className); --> var elementos_parrafo = vcontenido.getElementsByTagName('p'); var tam_actual; for ( var i = 0; i < elementos_parrafo.length; i++) { <!-- console.log(elementos_parrafo[i].style.fontSize); --> tam_actual = parseInt(elementos_parrafo[i]\n\nNorma: Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica\nArtículo: p1 — Parte 1\nTipo: resolucion | Autoridad: DIAN | Año: 2020\nTemas: Factoring"
+  },
+  {
+    "id": "res-042-2020-dian-p2",
+    "normId": "res-042-2020-dian",
+    "normName": "Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica",
+    "year": 2020,
+    "authority": "DIAN",
+    "type": "resolucion",
+    "temas": [
+      "Factoring"
+    ],
+    "articleNum": "p2",
+    "articleTitle": "Parte 2",
+    "content": "} if(accion=='reduce'){ elementos_parrafo[i].style.fontSize = (tam_actual - 1) + 'px'; } } } p { margin-top: 1rem; margin-bottom: 1rem; } INGRESAR A LA INTRANET A+ A- EVA Publicaciones Gestor Normativo Red de servidores Cursos virtuales Curso de integridad Programa de inducción y reinducción Curso para Veedurías Ciudadanas Curso para Gerentes PÃºblicos Curso MIPG Curso de Empleo PÃºblico Formatos Contáctenos Preguntas frecuentes EVA Gestor Normativo Normas de la Función Pública function eliminateDuplicates(arr) { //console.log(arr); var i, len=arr.length, out=[], obj={}; for (i=len-1;i>=0;i--) { obj[arr[i]]=0; } //console.log(obj); for (i in obj) { out.push(i); //console.log(i); } out.reverse(); return out; } if (sessionStorage.migapan) { sessionStorage.migapan = sessionStorage.migapan + ''; var normas = sessionStorage.migapan.split('+'); normas = eliminateDuplicates(normas); sessionStorage.migapan = normas.join('+'); } else { sessionStorage.migapan = '|'; } var migadepan = sessionStorage.migapan.split(\"+\");",
+    "embeddingText": "} if(accion=='reduce'){ elementos_parrafo[i].style.fontSize = (tam_actual - 1) + 'px'; } } } p { margin-top: 1rem; margin-bottom: 1rem; } INGRESAR A LA INTRANET A+ A- EVA Publicaciones Gestor Normativo Red de servidores Cursos virtuales Curso de integridad Programa de inducción y reinducción Curso para Veedurías Ciudadanas Curso para Gerentes PÃºblicos Curso MIPG Curso de Empleo PÃºblico Formatos Contáctenos Preguntas frecuentes EVA Gestor Normativo Normas de la Función Pública function eliminateDuplicates(arr) { //console.log(arr); var i, len=arr.length, out=[], obj={}; for (i=len-1;i>=0;i--) { obj[arr[i]]=0; } //console.log(obj); for (i in obj) { out.push(i); //console.log(i); } out.reverse(); return out; } if (sessionStorage.migapan) { sessionStorage.migapan = sessionStorage.migapan + '\n\nNorma: Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica\nArtículo: p2 — Parte 2\nTipo: resolucion | Autoridad: DIAN | Año: 2020\nTemas: Factoring"
+  },
+  {
+    "id": "res-042-2020-dian-p3",
+    "normId": "res-042-2020-dian",
+    "normName": "Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica",
+    "year": 2020,
+    "authority": "DIAN",
+    "type": "resolucion",
+    "temas": [
+      "Factoring"
+    ],
+    "articleNum": "p3",
+    "articleTitle": "Parte 3",
+    "content": "var txt_miga='<li><a href=\"/web/eva\">Inicio</a></li><li><a href=\"/web/eva/gestor-normativo\">Gestor Normativo</a></li><li><a href=\"consulta-avanzada.jsp\">Consulta</a></li>'; for (j=0;j<migadepan.length;j++) { var xnorma=migadepan[j].split(\"|\"); txt_miga+='<li><a href=\"/eva/gestornormativo/norma.php?i='+xnorma[1]+'\">'+xnorma[0]+'</a></li>'; } document.getElementById(\"spanmiga\").innerHTML=txt_miga; × Esta página no está disponible, la norma puede que ya no este disponible o se ha utilizado un enlace erróneo Intente nuevamente con la búsqueda de la avanzada de normas",
+    "embeddingText": "var txt_miga='<li><a href=\"/web/eva\">Inicio</a></li><li><a href=\"/web/eva/gestor-normativo\">Gestor Normativo</a></li><li><a href=\"consulta-avanzada.jsp\">Consulta</a></li>'; for (j=0;j<migadepan.length;j++) { var xnorma=migadepan[j].split(\"|\"); txt_miga+='<li><a href=\"/eva/gestornormativo/norma.php?i='+xnorma[1]+'\">'+xnorma[0]+'</a></li>'; } document.getElementById(\"spanmiga\").innerHTML=txt_miga; × Esta página no está disponible, la norma puede que ya no este disponible o se ha utilizado un enlace erróneo Intente nuevamente con la búsqueda de la avanzada de normas\n\nNorma: Resolución 042 de 2020 DIAN — RADIAN/Facturación Electrónica\nArtículo: p3 — Parte 3\nTipo: resolucion | Autoridad: DIAN | Año: 2020\nTemas: Factoring"
   }
 ]
