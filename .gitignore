@@ -43,3 +43,6 @@ data/embeddings.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+data/norms/raw/
+data/documents-v1-backup.json
+data/documents-v2.json

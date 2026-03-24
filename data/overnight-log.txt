@@ -759,3 +759,76 @@ Route (app)
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
 
+[main 82977a0] data: enriched embeddings + benchmark results (overnight pipeline)
+ 5 files changed, 17764 insertions(+), 223 deletions(-)
+ create mode 100644 data/benchmark-report.md
+ create mode 100644 data/benchmark-results.json
+ create mode 100644 data/overnight-log.txt
+To https://github.com/Cespial/sherlock-rag-demo.git
+   ae3cbd6..82977a0  main -> main
+Retrieving project…
+Deploying cespials-projects/sherlock-rag-demo
+Uploading [--------------------] (0.0B/8MB)
+Uploading [=====---------------] (2.0MB/8MB)
+Uploading [==========----------] (4.0MB/8MB)
+Uploading [===============-----] (6.0MB/8MB)
+Uploading [====================] (8.0MB/8MB)
+Inspect: https://vercel.com/cespials-projects/sherlock-rag-demo/71HSeh291nmHabwwsBFy4WYibRL6 [6s]
+Production: https://sherlock-rag-demo-7onik4p0c-cespials-projects.vercel.app [6s]
+https://sherlock-rag-demo-7onik4p0c-cespials-projects.vercel.appBuilding...
+Building...
+Building: Running build in Washington, D.C., USA (East) – iad1 (Turbo Build Machine)
+Building: Build machine configuration: 30 cores, 60 GB
+Building: Retrieving list of deployment files...
+Building: Downloading 66 deployment files...
+Building: Restored build cache from previous deployment (69Ck1YqqV6vboiukf79drktqGfCD)
+Building: Running "vercel build"
+Building: Vercel CLI 50.34.2
+Building: Installing dependencies...
+Building: up to date in 1s
+Building: 221 packages are looking for funding
+Building: run `npm fund` for details
+Building: Detected Next.js version: 16.2.0
+Building: Running "npm run build"
+Building: > sherlock-rag-demo@0.1.0 build
+Building: > next build
+Building: ▲ Next.js 16.2.0 (Turbopack)
+Building: ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+Building: Creating an optimized production build ...
+Building: ✓ Compiled successfully in 3.4s
+Building: Running TypeScript ...
+Building: Finished TypeScript in 2.8s ...
+Building: Collecting page data using 8 workers ...
+Building: Generating static pages using 8 workers (0/7) ...
+Building: Generating static pages using 8 workers (1/7)
+Building: Generating static pages using 8 workers (3/7)
+Building: Generating static pages using 8 workers (5/7)
+Building: ✓ Generating static pages using 8 workers (7/7) in 477ms
+Building: Finalizing page optimization ...
+Building: Running onBuildComplete from Vercel
+Building: Route (app)
+Building: ┌ ○ /
+Building: ├ ○ /_not-found
+Building: ├ ƒ /api/agent
+Building: ├ ƒ /api/chat
+Building: └ ƒ /api/health
+Building: ƒ Proxy (Middleware)
+Building: ○  (Static)   prerendered as static content
+Building: ƒ  (Dynamic)  server-rendered on demand
+Building: Build Completed in /vercel/output [10s]
+Building: Deploying outputs...
+[2K[1A[2K[GProduction: https://sherlock-rag-demo-7onik4p0c-cespials-projects.vercel.app [27s]
+Completing...
+Aliased: https://sherlock-rag-demo.vercel.app [27s]
+
+Common next commands:
+- `vercel inspect sherlock-rag-demo-7onik4p0c-cespials-projects.vercel.app --logs`
+- `vercel redeploy sherlock-rag-demo-7onik4p0c-cespials-projects.vercel.app`
+
+════════════════════════════════════════════
+  PIPELINE COMPLETE
+  Finished: Sat Mar 21 00:26:21 -05 2026
+  Results: data/benchmark-results.json
+  Report:  data/benchmark-report.md
+  Log:     data/overnight-log.txt
+════════════════════════════════════════════
